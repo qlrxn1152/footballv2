@@ -28,8 +28,8 @@ public class AuthController { // 로그인, 회원가입, 비밀번호 검증등
     }
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest LoginRequest) {
-        LoginResponse response = authService.login(LoginRequest.getUsername(), LoginRequest.getPassword());
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        LoginResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
