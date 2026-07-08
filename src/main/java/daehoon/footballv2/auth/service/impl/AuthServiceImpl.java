@@ -7,6 +7,7 @@ import daehoon.footballv2.auth.dto.SignupResponse;
 import daehoon.footballv2.auth.exception.exceptions.DuplicateUsernameException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.auth.service.AuthService;
+import daehoon.footballv2.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder encoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public SignupResponse signup(String username, String password) {
@@ -50,6 +52,14 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidLoginException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        return new LoginResponse(member.getId(), member.getUsername(), member.getRating());
+        String accessToken = jwtTokenProvider.createAccessToken(member);
+
+        return new LoginResponse(
+                accessToken,
+                "Bearer",
+                jwtTokenProvider.getAccessTokenExpirationSeconds(),
+                member.getId(),
+                member.getUsername(),
+                member.getRating());
     }
 }
