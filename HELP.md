@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'daehoon.football-v2' is invalid and this project uses 'daehoon.football_v2' instead.
+* The original package name 'daehoon.football-v2' is invalid and this project uses 'daehoon.footballv2' instead.
 
 # Getting Started
 

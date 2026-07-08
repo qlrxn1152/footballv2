@@ -1,4 +1,4 @@
-package daehoon.football_v2;
+package daehoon.footballv2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
