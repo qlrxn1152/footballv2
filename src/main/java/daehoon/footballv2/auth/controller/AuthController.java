@@ -31,6 +31,7 @@ public class AuthController { // 로그인, 회원가입, 비밀번호 검증등
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
 
+
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

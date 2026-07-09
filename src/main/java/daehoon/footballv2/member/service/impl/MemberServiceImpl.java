@@ -1,6 +1,7 @@
 package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
+import daehoon.footballv2.member.exception.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,18 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member findByMemberId(Long memberId) {
-        return null;
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
     }
 
     @Override
     public Member findByUsername(String username) {
-        return null;
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
     }
 
     @Override
     public List<Member> findAll() {
-        return List.of();
+        return memberRepository.findAll();
     }
 }
