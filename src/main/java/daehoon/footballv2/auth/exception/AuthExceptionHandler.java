@@ -14,24 +14,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class AuthExceptionHandler {
 
     @ExceptionHandler(DuplicateUsernameException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateUsernameException(DuplicateUsernameException ex) {
+    public ResponseEntity<AuthErrorResponse> handleDuplicateUsernameException(DuplicateUsernameException ex) {
         log.warn("Duplicate username : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("DUPLICATE_USERNAME", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new AuthErrorResponse("DUPLICATE_USERNAME", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidLoginException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidLoginException(InvalidLoginException ex) {
+    public ResponseEntity<AuthErrorResponse> handleInvalidLoginException(InvalidLoginException ex) {
         log.warn("Invalid Login Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("INVALID_LOGIN", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("INVALID_LOGIN", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<AuthErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         log.warn("Validation error: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("VALIDATION_ERROR", "아이디 또는 비밀번호 길이를 확인하세요."));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("VALIDATION_ERROR", "아이디 또는 비밀번호 길이를 확인하세요."));
     }
 
 
