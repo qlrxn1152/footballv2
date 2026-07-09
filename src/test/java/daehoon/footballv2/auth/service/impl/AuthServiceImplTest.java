@@ -39,7 +39,7 @@ class AuthServiceImplTest {
 
         // then
         assertThat(member.getUsername()).isEqualTo(username);
-        assertThat(member.getRating()).isEqualTo(1500);
+        assertThat(member.getMemberRating()).isEqualTo(1500);
         assertThat(member.getId()).isNotNull();
 
         assertThat(passwordEncoder.matches(password, member.getPassword())).isEqualTo(true);

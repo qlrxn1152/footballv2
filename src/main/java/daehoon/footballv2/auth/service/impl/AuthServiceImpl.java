@@ -36,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
         return new SignupResponse(
                 savedMember.getId(),
                 savedMember.getUsername(),
-                savedMember.getRating()
+                savedMember.getMemberRating()
         );
     }
 
@@ -60,6 +60,6 @@ public class AuthServiceImpl implements AuthService {
                 jwtTokenProvider.getAccessTokenExpirationSeconds(),
                 member.getId(),
                 member.getUsername(),
-                member.getRating());
+                member.getMemberRating());
     }
 }

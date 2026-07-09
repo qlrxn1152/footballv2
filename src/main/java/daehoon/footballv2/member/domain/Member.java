@@ -25,7 +25,7 @@ public class Member {
     private String password;
 
     @Column(name = "member_rating", nullable = false)
-    private int rating;
+    private int memberRating;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -33,7 +33,7 @@ public class Member {
     public Member(String username, String password) {
         this.username = username;
         this.password = password;
-        this.rating = DEFAULT_MEMBER_RATING;
+        this.memberRating = DEFAULT_MEMBER_RATING;
         this.createdAt = LocalDateTime.now();
     }
 }

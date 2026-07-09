@@ -127,6 +127,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamJoinRequestSummaryResponse> findJoinRequests(Long teamId, Long leaderMemberId, TeamJoinRequestStatus status) {
 
         TeamMember teamLeader = teamMemberRepository.findByMemberId(leaderMemberId)
@@ -145,9 +146,6 @@ public class TeamServiceImpl implements TeamService {
             throw new NotTeamLeaderException("팀장이 아닙니다.");
         }
 
-
-
-
         return teamJoinRequestRepository.findByTeamIdAndStatusOrderByCreatedAtDesc(teamId, status)
                 .stream()
                 .map(request -> new TeamJoinRequestSummaryResponse(
@@ -163,6 +161,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamMemberSummaryResponse> findTeamMembers(Long teamId) {
 
         teamRepository.findById(teamId)
@@ -176,7 +175,7 @@ public class TeamServiceImpl implements TeamService {
                         teamMember.getTeam().getTeamName(),
                         teamMember.getMember().getId(),
                         teamMember.getMember().getUsername(),
-                        teamMember.getMember().getRating(),
+                        teamMember.getMember().getMemberRating(),
                         teamMember.getTeamRole(),
                         teamMember.getJoinedAt()
                 ))
@@ -185,6 +184,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TeamDetailResponse findTeamDetail(Long teamId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
@@ -204,6 +204,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamSummaryResponse> findTeams() {
 
         return teamRepository.findAllByOrderByTeamRatingDesc()
@@ -223,7 +224,6 @@ public class TeamServiceImpl implements TeamService {
                     );
                 })
                 .toList();
-
     }
 
 
