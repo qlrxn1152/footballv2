@@ -8,6 +8,7 @@ import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
+import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
@@ -496,6 +497,50 @@ class TeamServiceImplTest {
         assertThat(members).hasSize(3);
         assertThat(members)
                 .allMatch(teamMember -> teamMember.getTeamName().equals(team.getTeamName()));
+    }
+
+
+    // 팀 상세페이지
+    @Test
+    @DisplayName(value = "팀 상세페이지 조회")
+    void teamDetail() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+        SignupResponse memberD = authService.signup("userD", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청
+        TeamJoinRequestCreateResponse request3 = teamService.joinRequest(team.getTeamId(), memberD.getMemberId());// memberD -> teamA 가입신청
+
+        teamService.acceptRequest(request1.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가입신청 승인
+        teamService.acceptRequest(request2.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가입신청 승인
+        teamService.rejectRequest(request3.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가입신청 거절
+
+        // when
+        TeamDetailResponse response = teamService.findTeamDetail(team.getTeamId());// teamA 상세페이지
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getTeamName()).isEqualTo("teamA");
+        assertThat(response.getMemberCount()).isEqualTo(3);
+        assertThat(response.getLeaderMemberId()).isEqualTo(memberA.getMemberId());
+        assertThat(response.getLeaderUsername()).isEqualTo("userA");
+    }
+
+    // 팀 상세페이지
+    @Test
+    @DisplayName(value = "존재하지 않는 팀 상세페이지")
+    void teamDetail_notExistTeam() throws Exception {
+
+        // when && then
+        assertThatThrownBy(() -> teamService.findTeamDetail(999L))
+                .isInstanceOf(NotFoundTeamException.class)
+                .hasMessage("팀 조회 실패");
+
     }
 
 

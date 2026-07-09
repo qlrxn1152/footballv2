@@ -5,6 +5,7 @@ import daehoon.footballv2.member.exception.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.team.domain.*;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
+import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
@@ -179,6 +180,25 @@ public class TeamServiceImpl implements TeamService {
                 ))
                 .toList();
 
+    }
+
+    @Override
+    public TeamDetailResponse findTeamDetail(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+
+        int count = teamMemberRepository.countMemberByTeamId(teamId);// 팀에 속한 회원이 몇명인지
+        TeamMember leaderMember = teamMemberRepository.findLeaderMemberByTeamIdAndTeamRole(teamId, TeamRole.LEADER);
+
+        return new TeamDetailResponse(
+                team.getId(),
+                team.getTeamName(),
+                team.getTeamRating(),
+                leaderMember.getMember().getId(),
+                leaderMember.getMember().getUsername(),
+                count,
+                team.getCreatedAt()
+        );
     }
 
 

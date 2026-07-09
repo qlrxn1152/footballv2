@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,12 +27,12 @@ public class Team {
     private int teamRating;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     public Team(String teamName) {
         this.teamName = teamName;
         this.teamRating = DEFAULT_TEAM_RATING;
-        this.createdAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
     }
 
 }

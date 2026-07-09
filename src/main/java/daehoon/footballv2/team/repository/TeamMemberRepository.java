@@ -1,6 +1,7 @@
 package daehoon.footballv2.team.repository;
 
 import daehoon.footballv2.team.domain.TeamMember;
+import daehoon.footballv2.team.domain.TeamRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +14,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     Optional<TeamMember> findByMemberId(Long memberId);
 
     List<TeamMember> findByTeamIdOrderByJoinedAtAsc(Long teamId);
+
+    TeamMember findLeaderMemberByTeamIdAndTeamRole(Long teamId, TeamRole teamRole);
+
+    int countMemberByTeamId(Long teamId);
 }
