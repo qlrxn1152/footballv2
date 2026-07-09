@@ -8,6 +8,7 @@ import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -156,6 +157,28 @@ public class TeamServiceImpl implements TeamService {
                         request.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public List<TeamMemberSummaryResponse> findTeamMembers(Long teamId) {
+
+        teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+
+        return teamMemberRepository.findByTeamIdOrderByJoinedAtAsc(teamId)
+                .stream()
+                .map(teamMember -> new TeamMemberSummaryResponse(
+                        teamMember.getId(),
+                        teamMember.getTeam().getId(),
+                        teamMember.getTeam().getTeamName(),
+                        teamMember.getMember().getId(),
+                        teamMember.getMember().getUsername(),
+                        teamMember.getMember().getRating(),
+                        teamMember.getTeamRole(),
+                        teamMember.getJoinedAt()
+                ))
+                .toList();
+
     }
 
 

@@ -6,6 +6,7 @@ import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 
 import java.util.List;
 
@@ -20,5 +21,7 @@ public interface TeamService {
     TeamJoinRequestDecisionResponse rejectRequest(Long joinRequestId, Long teamId, Long memberId);
 
     List<TeamJoinRequestSummaryResponse> findJoinRequests(Long teamId, Long leaderMemberId, TeamJoinRequestStatus status);
+
+    List<TeamMemberSummaryResponse> findTeamMembers(Long teamId);
 
 }

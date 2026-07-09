@@ -11,6 +11,7 @@ import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -470,6 +471,31 @@ class TeamServiceImplTest {
         assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberD.getMemberId(), TeamJoinRequestStatus.PENDING))
                 .isInstanceOf(NotJoinedTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
+    }
+
+    @Test
+    @DisplayName(value = "팀 멤버 조회")
+    void findTeamMembers() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+        SignupResponse memberD = authService.signup("userD", "1234");
+
+        TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청
+        teamService.acceptRequest(request1.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가입신청 승인
+        teamService.acceptRequest(request2.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가입신청 승인
+
+        // when
+        List<TeamMemberSummaryResponse> members = teamService.findTeamMembers(team.getTeamId());
+
+        // then
+        assertThat(members).hasSize(3);
+        assertThat(members)
+                .allMatch(teamMember -> teamMember.getTeamName().equals(team.getTeamName()));
     }
 
 

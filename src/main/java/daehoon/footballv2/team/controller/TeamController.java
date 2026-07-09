@@ -6,6 +6,7 @@ import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,14 @@ public class TeamController {
         List<TeamJoinRequestSummaryResponse> response = teamService.findJoinRequests(teamId, leaderMemberId, status); // status 에 따라서 요청
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/api/teams/{teamId}/members")
+    public ResponseEntity<List<TeamMemberSummaryResponse>> teamMembers(@PathVariable Long teamId) {
+        List<TeamMemberSummaryResponse> response = teamService.findTeamMembers(teamId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 
 }
