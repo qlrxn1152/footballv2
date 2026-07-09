@@ -1,6 +1,7 @@
 package daehoon.footballv2.team.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ public class Team {
     @Column(name = "team_id")
     private Long id;
 
-    @Column(name = "team_name", nullable = false, unique = true, length = 10)
+    @Column(name = "team_name", nullable = false, unique = true)
     private String teamName;
 
     @Column(name = "team_rating", nullable = false)
@@ -32,4 +33,5 @@ public class Team {
         this.teamRating = DEFAULT_TEAM_RATING;
         this.createdAt = LocalDate.now();
     }
+
 }

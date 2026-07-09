@@ -1,4 +1,4 @@
-package daehoon.footballv2.auth.dto.login;
+package daehoon.footballv2.auth.dto.response.login;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

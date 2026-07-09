@@ -1,9 +1,9 @@
 package daehoon.footballv2.auth.controller;
 
-import daehoon.footballv2.auth.dto.login.LoginRequest;
-import daehoon.footballv2.auth.dto.login.LoginResponse;
-import daehoon.footballv2.auth.dto.signup.SignupRequest;
-import daehoon.footballv2.auth.dto.signup.SignupResponse;
+import daehoon.footballv2.auth.dto.request.login.LoginRequest;
+import daehoon.footballv2.auth.dto.response.login.LoginResponse;
+import daehoon.footballv2.auth.dto.request.signup.SignupRequest;
+import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
