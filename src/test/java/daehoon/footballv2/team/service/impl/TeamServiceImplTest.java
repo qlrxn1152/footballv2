@@ -10,6 +10,7 @@ import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
+import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -334,6 +337,139 @@ class TeamServiceImplTest {
         assertThatThrownBy(() -> teamService.rejectRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()))
                 .isInstanceOf(TeamJoinRequestException.class)
                 .hasMessage("이미 가입신청을 승인 / 거절한 요청입니다.");
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "status 에 따라 가입신청들 조회 ( PENDING )")
+    void findJoinRequests_pending() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        teamService.joinRequest(team.getTeamId(), memberB.getMemberId()); // memberB -> teamA 가입신청.
+        teamService.joinRequest(team.getTeamId(), memberC.getMemberId()); // memberB -> teamA 가입신청.
+
+        // when
+        List<TeamJoinRequestSummaryResponse> requests = teamService.findJoinRequests(team.getTeamId(), memberA.getMemberId(), TeamJoinRequestStatus.PENDING);
+
+        // then
+        assertThat(requests).hasSize(2);
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "status 에 따라 가입신청들 조회 ( REJECTED )")
+    void findJoinRequests_rejected() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청.
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberB -> teamA 가입신청.
+
+        teamService.rejectRequest(request1.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberB 가입신청 거절
+        teamService.rejectRequest(request2.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberC 가입신청 거절
+
+        // when
+        List<TeamJoinRequestSummaryResponse> requests = teamService.findJoinRequests(team.getTeamId(), memberA.getMemberId(), TeamJoinRequestStatus.REJECTED);
+
+        // then
+        assertThat(requests).hasSize(2);
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "status 에 따라 가입신청들 조회 ( ACCEPTED )")
+    void findJoinRequests_accepted() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청.
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberB -> teamA 가입신청.
+
+        teamService.acceptRequest(request1.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberB 가입신청 승인
+        teamService.acceptRequest(request2.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberC 가입신청 승인
+
+        // when
+        List<TeamJoinRequestSummaryResponse> requests = teamService.findJoinRequests(team.getTeamId(), memberA.getMemberId(), TeamJoinRequestStatus.ACCEPTED);
+
+        // then
+        assertThat(requests).hasSize(2);
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "팀장이 아닌 팀에속하지 않은 회원이 가입신청들 조회")
+    void findJoinRequests_noTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청.
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberB -> teamA 가입신청.
+
+        // when && then
+        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "다른팀 팀장이 가입신청들 조회")
+    void findJoinRequests_otherTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        teamService.createTeam("teamB", memberB.getMemberId()); // memberB -> teamB 생성
+
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청.
+
+        // when && then
+        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
+    }
+
+    // 가입요청들 조회
+    @Test
+    @DisplayName(value = "다른팀 회원이 가입신청들 조회")
+    void findJoinRequests_otherTeamMember() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+        SignupResponse memberD = authService.signup("userD", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());// memberB -> teamB 생성
+
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(teamB.getTeamId(), memberD.getMemberId());// memberD -> teamB 에 가입신청
+        teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청.
+
+        teamService.acceptRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberB.getMemberId()); // memberB -> memberD 가 신청한 가입신청을 승인.
+
+        // when && then
+        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberD.getMemberId(), TeamJoinRequestStatus.PENDING))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
     }
 
 

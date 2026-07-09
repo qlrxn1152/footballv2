@@ -7,6 +7,7 @@ import daehoon.footballv2.team.domain.*;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
+import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -119,6 +122,41 @@ public class TeamServiceImpl implements TeamService {
 
     }
 
+    @Override
+    public List<TeamJoinRequestSummaryResponse> findJoinRequests(Long teamId, Long leaderMemberId, TeamJoinRequestStatus status) {
+
+        TeamMember teamLeader = teamMemberRepository.findByMemberId(leaderMemberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+
+        // 팀장인지 조회 -> 우선 로그인한 사람이 팀 있는건 맞음? , 팀이있다면, 해당팀의 id랑 teamId 가 같나?, 같으면 해당팀 팀장이 맞나?
+        if (teamLeader.getTeam() == null) {
+            throw new NotJoinedTeamException("팀에 속해있지 않습니다.");
+        }
+
+        if (!teamLeader.getTeam().getId().equals(teamId)) {
+            throw new NotJoinedTeamException("다른팀 소속입니다.");
+        }
+
+        if (!teamLeader.getTeamRole().equals(TeamRole.LEADER)) {
+            throw new NotTeamLeaderException("팀장이 아닙니다.");
+        }
+
+
+
+
+        return teamJoinRequestRepository.findByTeamIdAndStatusOrderByCreatedAtDesc(teamId, status)
+                .stream()
+                .map(request -> new TeamJoinRequestSummaryResponse(
+                        request.getId(),
+                        request.getTeam().getId(),
+                        request.getTeam().getTeamName(),
+                        request.getMember().getId(),
+                        request.getMember().getUsername(),
+                        request.getStatus(),
+                        request.getCreatedAt()
+                ))
+                .toList();
+    }
 
 
     // 비즈니스 로직

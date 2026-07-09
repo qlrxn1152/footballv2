@@ -1,9 +1,11 @@
 package daehoon.footballv2.team.controller;
 
+import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.dto.request.teamcreate.TeamCreateRequest;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
+import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
 import daehoon.footballv2.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -53,8 +57,15 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/api/teams/{teamId}/join-requests")
+    public ResponseEntity<List<TeamJoinRequestSummaryResponse>> requests(
+            @PathVariable Long teamId,
+            @RequestHeader("X-MEMBER-ID") Long leaderMemberId,
+            @RequestParam TeamJoinRequestStatus status) {
 
+        List<TeamJoinRequestSummaryResponse> response = teamService.findJoinRequests(teamId, leaderMemberId, status); // status 에 따라서 요청
 
-
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }
