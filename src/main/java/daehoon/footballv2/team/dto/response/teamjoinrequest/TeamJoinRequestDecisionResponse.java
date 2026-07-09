@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor
-public class TeamJoinRequestCreateResponse {
+public class TeamJoinRequestDecisionResponse {
 
     private Long teamJoinRequestId;
     private Long teamId;
@@ -18,7 +18,7 @@ public class TeamJoinRequestCreateResponse {
 
     private TeamJoinRequestStatus status;
 
-    public TeamJoinRequestCreateResponse(Long teamJoinRequestId, Long teamId, String teamName, Long memberId, String username, TeamJoinRequestStatus status) {
+    public TeamJoinRequestDecisionResponse(Long teamJoinRequestId, Long teamId, String teamName, Long memberId, String username, TeamJoinRequestStatus status) {
         this.teamJoinRequestId = teamJoinRequestId;
         this.teamId = teamId;
         this.teamName = teamName;
@@ -26,6 +26,4 @@ public class TeamJoinRequestCreateResponse {
         this.username = username;
         this.status = status;
     }
-
-
 }

@@ -3,6 +3,7 @@ package daehoon.footballv2.team.controller;
 import daehoon.footballv2.team.dto.request.teamcreate.TeamCreateRequest;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
+import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,29 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/api/teams/{teamId}/join-requests/{joinRequestId}/accept")
+    public ResponseEntity<TeamJoinRequestDecisionResponse> acceptRequest(
+            @PathVariable Long teamId,
+            @PathVariable Long joinRequestId,
+            @RequestHeader("X-MEMBER-ID") Long loginMemberId) {
+        TeamJoinRequestDecisionResponse response = teamService.acceptRequest(joinRequestId, teamId, loginMemberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/api/teams/{teamId}/join-requests/{joinRequestId}/reject")
+    public ResponseEntity<TeamJoinRequestDecisionResponse> rejectRequest(
+            @PathVariable Long teamId,
+            @PathVariable Long joinRequestId,
+            @RequestHeader("X-MEMBER-ID") Long loginMemberId) {
+        TeamJoinRequestDecisionResponse response = teamService.rejectRequest(joinRequestId, teamId, loginMemberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+
 
 
 }

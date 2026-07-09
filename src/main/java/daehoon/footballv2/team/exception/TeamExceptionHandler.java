@@ -3,10 +3,7 @@ package daehoon.footballv2.team.exception;
 import daehoon.footballv2.auth.exception.AuthErrorResponse;
 import daehoon.footballv2.auth.exception.exceptions.DuplicateUsernameException;
 import daehoon.footballv2.auth.exception.exceptions.InvalidLoginException;
-import daehoon.footballv2.team.exception.exceptions.AlreadyJoinedTeamException;
-import daehoon.footballv2.team.exception.exceptions.DuplicateTeamJoinRequestException;
-import daehoon.footballv2.team.exception.exceptions.DuplicateTeamNameException;
-import daehoon.footballv2.team.exception.exceptions.NotFoundTeamException;
+import daehoon.footballv2.team.exception.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +43,40 @@ public class TeamExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("DUPLICATE_TEAM_JOIN_REQUEST", ex.getMessage()));
     }
 
+    @ExceptionHandler(NotTeamLeaderException.class)
+    public ResponseEntity<AuthErrorResponse> handleNotTeamLeaderException(NotTeamLeaderException ex) {
+        log.warn("Not TeamLeader Exception : {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("NOT_TEAM_LEADER", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundTeamJoinRequestException.class)
+    public ResponseEntity<AuthErrorResponse> handleNotFoundTeamJoinRequestException(NotFoundTeamJoinRequestException ex) {
+        log.warn("Not Found TeamJoinRequest Exception : {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("NOT_FOUND_TEAM_JOIN_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotJoinedTeamException.class)
+    public ResponseEntity<AuthErrorResponse> handleNotJoinedTeamException(NotJoinedTeamException ex) {
+        log.warn("Not JoinedTeam Exception : {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("NOT_JOINED_TEAM", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotSameTeamException.class)
+    public ResponseEntity<AuthErrorResponse> handleNotSameTeamException(NotSameTeamException ex) {
+        log.warn("Not SameTeam Exception : {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("NOT_SAME_TEAM", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TeamJoinRequestException.class)
+    public ResponseEntity<AuthErrorResponse> handleTeamJoinRequestException(TeamJoinRequestException ex) {
+        log.warn("TeamJoinRequest Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("TEAM_JOIN_REQUEST", ex.getMessage()));
+    }
 
 
 }

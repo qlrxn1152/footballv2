@@ -38,4 +38,14 @@ public class TeamJoinRequest {
         this.status = TeamJoinRequestStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void acceptedRequest() {
+        this.status = TeamJoinRequestStatus.ACCEPTED;
+    }
+
+    public void rejectedRequest() {
+        this.status = TeamJoinRequestStatus.REJECTED;
+    }
+
+
 }
