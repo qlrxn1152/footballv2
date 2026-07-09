@@ -1,4 +1,4 @@
-package daehoon.footballv2.auth.dto;
+package daehoon.footballv2.auth.dto.login;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

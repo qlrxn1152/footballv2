@@ -1,15 +1,12 @@
 package daehoon.footballv2.auth.service.impl;
 
-import daehoon.footballv2.auth.dto.LoginResponse;
-import daehoon.footballv2.auth.dto.SignupRequest;
-import daehoon.footballv2.auth.dto.SignupResponse;
+import daehoon.footballv2.auth.dto.login.LoginResponse;
+import daehoon.footballv2.auth.dto.signup.SignupResponse;
 import daehoon.footballv2.auth.exception.exceptions.DuplicateUsernameException;
 import daehoon.footballv2.auth.exception.exceptions.InvalidLoginException;
 import daehoon.footballv2.auth.service.AuthService;
 import daehoon.footballv2.member.domain.Member;
 import daehoon.footballv2.member.repository.MemberRepository;
-import daehoon.footballv2.member.service.MemberService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")

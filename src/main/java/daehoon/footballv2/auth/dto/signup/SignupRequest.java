@@ -1,6 +1,5 @@
-package daehoon.footballv2.auth.dto;
+package daehoon.footballv2.auth.dto.signup;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

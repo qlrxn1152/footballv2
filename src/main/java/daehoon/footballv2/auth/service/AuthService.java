@@ -1,8 +1,7 @@
 package daehoon.footballv2.auth.service;
 
-import daehoon.footballv2.auth.dto.LoginResponse;
-import daehoon.footballv2.member.domain.Member;
-import daehoon.footballv2.auth.dto.SignupResponse;
+import daehoon.footballv2.auth.dto.login.LoginResponse;
+import daehoon.footballv2.auth.dto.signup.SignupResponse;
 
 public interface AuthService {
 
