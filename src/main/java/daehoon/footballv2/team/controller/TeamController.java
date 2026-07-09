@@ -7,6 +7,7 @@ import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.service.TeamService;
 import jakarta.validation.Valid;
@@ -84,4 +85,10 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/api/teams")
+    public ResponseEntity<List<TeamSummaryResponse>> teams() {
+        List<TeamSummaryResponse> response = teamService.findTeams();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

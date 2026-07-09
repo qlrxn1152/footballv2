@@ -9,6 +9,7 @@ import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -199,6 +201,29 @@ public class TeamServiceImpl implements TeamService {
                 count,
                 team.getCreatedAt()
         );
+    }
+
+    @Override
+    public List<TeamSummaryResponse> findTeams() {
+
+        return teamRepository.findAllByOrderByTeamRatingDesc()
+                .stream()
+                .map(team -> {
+                    int memberCount = teamMemberRepository.countMemberByTeamId(team.getId());
+                    TeamMember leaderMember = teamMemberRepository.findLeaderMemberByTeamIdAndTeamRole(team.getId(), TeamRole.LEADER);
+
+                    return new TeamSummaryResponse(
+                            team.getId(),
+                            team.getTeamName(),
+                            team.getTeamRating(),
+                            leaderMember.getMember().getId(),
+                            leaderMember.getMember().getUsername(),
+                            memberCount,
+                            team.getCreatedAt()
+                    );
+                })
+                .toList();
+
     }
 
 
