@@ -48,7 +48,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping("/api/members/me/team-join-requests/{joinRequestId}/cancel")
+    @PatchMapping("/api/members/me/team-join-requests/{joinRequestId}/cancel")
     public ResponseEntity<MyTeamJoinRequestResponse> cancelRequest(@PathVariable Long joinRequestId, @RequestHeader("X-MEMBER-ID") Long memberId) {
         // 해당 멤버의 가입신청들을 조회 -> 단, status = PENDING ..
         // joinRequestId 를 가진 TeamJoinRequest ... ( status = PENDING 이여야함. ) -> 요청 가지고옴 -> 요청 status = CANCELED 로 변경.
@@ -58,7 +58,7 @@ public class MemberController {
     }
 
     // 팀 탈퇴
-    @PostMapping("/api/members/me/team")
+    @DeleteMapping("/api/members/me/team")
     public ResponseEntity<TeamLeaveResponse> leaveTeam(@RequestHeader("X-MEMBER-ID") Long memberId) {
         TeamLeaveResponse response = memberService.leaveTeam(memberId);
 
