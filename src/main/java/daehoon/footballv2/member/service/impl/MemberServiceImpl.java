@@ -1,19 +1,15 @@
 package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
-import daehoon.footballv2.member.dto.response.MemberDetailResponse;
-import daehoon.footballv2.member.dto.response.MemberMeResponse;
-import daehoon.footballv2.member.dto.response.MemberRankingResponse;
-import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
+import daehoon.footballv2.member.dto.response.*;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.member.service.MemberService;
 import daehoon.footballv2.team.domain.TeamJoinRequest;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamMember;
-import daehoon.footballv2.team.exception.exceptions.NotFoundTeamJoinRequestException;
-import daehoon.footballv2.team.exception.exceptions.NotPendingException;
-import daehoon.footballv2.team.exception.exceptions.TeamJoinRequestException;
+import daehoon.footballv2.team.domain.TeamRole;
+import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
 import daehoon.footballv2.team.service.TeamService;
@@ -178,6 +174,30 @@ public class MemberServiceImpl implements MemberService {
                 member.getUsername(),
                 joinRequest.getStatus(),
                 joinRequest.getCreatedAt()
+        );
+
+    }
+
+    @Override
+    public TeamLeaveResponse leaveTeam(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패."));
+        TeamMember teamMember = teamMemberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new NotJoinedTeamException("팀에 속해있지 않습니다."));
+
+        if (teamMember.getTeamRole() == TeamRole.LEADER) {
+            throw new CannotLeaveTeamLeaderException("팀장은 탈퇴가 불가능합니다.");
+        }
+
+        // MEMBER 인 경우에만 실시.
+        teamMemberRepository.delete(teamMember);
+
+        return new TeamLeaveResponse(
+                member.getId(),
+                member.getUsername(),
+                teamMember.getTeam().getId(),
+                teamMember.getTeam().getTeamName(),
+                teamMember.getTeamRole()
         );
 
     }

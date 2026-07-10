@@ -2,19 +2,14 @@ package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
-import daehoon.footballv2.member.dto.response.MemberDetailResponse;
-import daehoon.footballv2.member.dto.response.MemberMeResponse;
-import daehoon.footballv2.member.dto.response.MemberRankingResponse;
-import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
+import daehoon.footballv2.member.dto.response.*;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.service.MemberService;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
-import daehoon.footballv2.team.exception.exceptions.NotFoundTeamJoinRequestException;
-import daehoon.footballv2.team.exception.exceptions.NotPendingException;
-import daehoon.footballv2.team.exception.exceptions.TeamJoinRequestException;
+import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.service.TeamService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -284,6 +279,75 @@ class MemberServiceImplTest {
                 .isInstanceOf(NotPendingException.class)
                 .hasMessage("이미 취소한 요청입니다."); // memberB -> 취소한 요청을 또 다시 취소시도
     }
+
+    @Test
+    @DisplayName(value = "팀 탈퇴 성공")
+    void leaveTeam() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());// memberA -> teamA 팀 생성
+
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청
+        teamService.acceptRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); //memberA -> memberA 가 teamA 에 넣은 가입신청을 수락
+
+        // when
+        TeamLeaveResponse response = memberService.leaveTeam(memberB.getMemberId());// memberB -> teamA 팀 탈퇴.
+        MemberMeResponse memberBInfo = memberService.findMyInfo(memberB.getMemberId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getMemberId()).isEqualTo(memberB.getMemberId());
+        assertThat(response.getUsername()).isEqualTo("userB");
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getTeamName()).isEqualTo("teamA");
+        assertThat(response.getTeamRole()).isEqualTo(TeamRole.MEMBER);
+        assertThat(response.isLeft()).isTrue();
+
+        assertThat(memberBInfo.getUsername()).isEqualTo("userB");
+
+        assertThat(memberBInfo.getTeamId()).isNull();
+        assertThat(memberBInfo.getTeamRole()).isNull();
+        assertThat(memberBInfo.getTeamName()).isNull();
+        assertThat(memberBInfo.getJoinedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName(value = "팀장 탈퇴시도")
+    void leaveTeam_teamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        teamService.createTeam("teamA", memberA.getMemberId());// memberA -> teamA 팀 생성
+
+        // when && then
+        assertThatThrownBy(() -> memberService.leaveTeam(memberA.getMemberId()))
+                .isInstanceOf(CannotLeaveTeamLeaderException.class)
+                .hasMessage("팀장은 탈퇴가 불가능합니다.");
+    }
+
+    @Test
+    @DisplayName(value = "팀에 속하지 않은 회원이 탈퇴를 시도")
+    void leaveTeam_notJoinedTeam() throws Exception {
+        // given
+        SignupResponse memberB = authService.signup("userB", "1234");
+
+        // when && then
+        assertThatThrownBy(() -> memberService.leaveTeam(memberB.getMemberId()))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("팀에 속해있지 않습니다.");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 memberId")
+    void leaveTeam_notExistMemberId() throws Exception {
+        // when && then
+        assertThatThrownBy(() -> memberService.leaveTeam(999L))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패.");
+    }
+
+
+
 
 
 

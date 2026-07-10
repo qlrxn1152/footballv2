@@ -1,10 +1,7 @@
 package daehoon.footballv2.member.service;
 
 import daehoon.footballv2.member.domain.Member;
-import daehoon.footballv2.member.dto.response.MemberDetailResponse;
-import daehoon.footballv2.member.dto.response.MemberMeResponse;
-import daehoon.footballv2.member.dto.response.MemberRankingResponse;
-import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
+import daehoon.footballv2.member.dto.response.*;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 
 import java.util.List;
@@ -19,4 +16,6 @@ public interface MemberService {
     List<MyTeamJoinRequestResponse> findMyTeamJoinRequests(Long memberId, TeamJoinRequestStatus status);
 
     MyTeamJoinRequestResponse cancelRequest(Long joinRequestId, Long memberId);
+
+    TeamLeaveResponse leaveTeam(Long memberId);
 }

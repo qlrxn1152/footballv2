@@ -1,9 +1,6 @@
 package daehoon.footballv2.member.controller;
 
-import daehoon.footballv2.member.dto.response.MemberDetailResponse;
-import daehoon.footballv2.member.dto.response.MemberMeResponse;
-import daehoon.footballv2.member.dto.response.MemberRankingResponse;
-import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
+import daehoon.footballv2.member.dto.response.*;
 import daehoon.footballv2.member.service.MemberService;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.service.TeamService;
@@ -60,4 +57,11 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 팀 탈퇴
+    @PostMapping("/api/members/me/team")
+    public ResponseEntity<TeamLeaveResponse> leaveTeam(@RequestHeader("X-MEMBER-ID") Long memberId) {
+        TeamLeaveResponse response = memberService.leaveTeam(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

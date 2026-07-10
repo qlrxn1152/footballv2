@@ -80,10 +80,19 @@ public class TeamExceptionHandler {
 
     @ExceptionHandler(NotPendingException.class)
     public ResponseEntity<TeamErrorResponse> handleNotPendingException(NotPendingException ex) {
-        log.warn("TeamJoinRequest Exception: {}", ex.getMessage());
+        log.warn("Not Pending Exception: {}", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_PENDING_STATUS", ex.getMessage()));
     }
+
+    @ExceptionHandler(CannotLeaveTeamLeaderException.class)
+    public ResponseEntity<TeamErrorResponse> handleCannotLeaveTeamLeaderException(CannotLeaveTeamLeaderException ex) {
+        log.warn("Cannot LeaveTeamLeader Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_LEAVE_TEAMLEADER", ex.getMessage()));
+    }
+
+
 
 
 
