@@ -17,4 +17,6 @@ public interface MemberService {
     MemberMeResponse findMyInfo(Long memberId);
 
     List<MyTeamJoinRequestResponse> findMyTeamJoinRequests(Long memberId, TeamJoinRequestStatus status);
+
+    MyTeamJoinRequestResponse cancelRequest(Long joinRequestId, Long memberId);
 }

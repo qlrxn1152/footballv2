@@ -12,6 +12,9 @@ import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
+import daehoon.footballv2.team.exception.exceptions.NotFoundTeamJoinRequestException;
+import daehoon.footballv2.team.exception.exceptions.NotPendingException;
+import daehoon.footballv2.team.exception.exceptions.TeamJoinRequestException;
 import daehoon.footballv2.team.service.TeamService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -183,6 +186,107 @@ class MemberServiceImplTest {
         assertThat(response.size()).isEqualTo(2);
         assertThat(response).allMatch(request -> request.getStatus() == TeamJoinRequestStatus.PENDING);
     }
+
+    @Test
+    @DisplayName(value = "가입신청 취소")
+    void cancelTeamJoinRequest() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());//  memberB -> teamA 가입신청
+
+        // when
+        MyTeamJoinRequestResponse response = memberService.cancelRequest(request.getTeamJoinRequestId(), memberB.getMemberId());// memberB -> teamA 에 넣은 가입신청 취소
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getUsername()).isEqualTo("userB");
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getTeamName()).isEqualTo("teamA");
+        assertThat(response.getStatus()).isEqualTo(TeamJoinRequestStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName(value = "본인이 아닌 다른회원이 가입신청을 취소")
+    void cancelTeamJoinRequest_fail_otherMember() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        SignupResponse memberC = authService.signup("userC", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());//  memberB -> teamA 가입신청
+
+        // when
+        assertThatThrownBy(() -> memberService.cancelRequest(request.getTeamJoinRequestId(), memberC.getMemberId()))
+                .isInstanceOf(TeamJoinRequestException.class)
+                .hasMessage("회원의 요청이 아닙니다."); // memberC -> memberB가  teamA 에 넣은 가입신청 취소
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 가입신청을 취소")
+    void cancelTeamJoinRequest_fail_notExistJoinRequest() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        // when
+        assertThatThrownBy(() -> memberService.cancelRequest(999L, memberB.getMemberId()))
+                .isInstanceOf(NotFoundTeamJoinRequestException.class)
+                .hasMessage("가입신청 조회 실패"); // memberB -> 존재하지 않는 가입신청을 취소시도
+    }
+
+    @Test
+    @DisplayName(value = "이미 승인된 요청을 취소")
+    void cancelTeamJoinRequest_fail_alreadyAcceptRequest() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 에 가입신청.
+        teamService.acceptRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가 teamA 에 넣은 가입신청을 수락.
+
+        // when
+        assertThatThrownBy(() -> memberService.cancelRequest(request.getTeamJoinRequestId(), memberB.getMemberId()))
+                .isInstanceOf(NotPendingException.class)
+                .hasMessage("이미 승인 / 거절 된 요청입니다."); // memberB -> 이미 수락된 요청을 취소시도
+    }
+
+    @Test
+    @DisplayName(value = "이미 거절된 요청을 취소")
+    void cancelTeamJoinRequest_fail_alreadyRejectRequest() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 에 가입신청.
+        teamService.rejectRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가 teamA 에 넣은 가입신청을 거절.
+
+        // when
+        assertThatThrownBy(() -> memberService.cancelRequest(request.getTeamJoinRequestId(), memberB.getMemberId()))
+                .isInstanceOf(NotPendingException.class)
+                .hasMessage("이미 승인 / 거절 된 요청입니다."); // memberB -> 이미 취소된 요청을 취소시도
+    }
+
+    @Test
+    @DisplayName(value = "이미 취소한 요청을 다시 취소시도")
+    void cancelTeamJoinRequest_fail_alreadyCanceled() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 에 가입신청.
+        memberService.cancelRequest(request.getTeamJoinRequestId(), memberB.getMemberId()); // memberB -> teamA 에 넣었던 가입신청을 취소.
+
+        // when
+        assertThatThrownBy(() -> memberService.cancelRequest(request.getTeamJoinRequestId(), memberB.getMemberId()))
+                .isInstanceOf(NotPendingException.class)
+                .hasMessage("이미 취소한 요청입니다."); // memberB -> 취소한 요청을 또 다시 취소시도
+    }
+
+
+
 
 
 }

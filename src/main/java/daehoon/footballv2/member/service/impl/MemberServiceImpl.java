@@ -8,8 +8,12 @@ import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.member.service.MemberService;
+import daehoon.footballv2.team.domain.TeamJoinRequest;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamMember;
+import daehoon.footballv2.team.exception.exceptions.NotFoundTeamJoinRequestException;
+import daehoon.footballv2.team.exception.exceptions.NotPendingException;
+import daehoon.footballv2.team.exception.exceptions.TeamJoinRequestException;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
 import daehoon.footballv2.team.service.TeamService;
@@ -143,6 +147,39 @@ public class MemberServiceImpl implements MemberService {
                         request.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public MyTeamJoinRequestResponse cancelRequest(Long joinRequestId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+
+        TeamJoinRequest joinRequest = teamJoinRequestRepository.findById(joinRequestId)
+                .orElseThrow(() -> new NotFoundTeamJoinRequestException("가입신청 조회 실패"));
+
+        if (!member.getId().equals(joinRequest.getMember().getId())) {
+            throw new TeamJoinRequestException("회원의 요청이 아닙니다.");
+        } // 본인요청인지 확인
+
+        if (joinRequest.getStatus() == TeamJoinRequestStatus.CANCELED) {
+            throw new NotPendingException("이미 취소한 요청입니다.");
+        }
+
+        if (joinRequest.getStatus() != TeamJoinRequestStatus.PENDING) {
+            throw new NotPendingException("이미 승인 / 거절 된 요청입니다.");
+        } // status = PENDING 인지 확인
+
+        joinRequest.canceledRequest();
+        return new MyTeamJoinRequestResponse(
+                joinRequest.getId(),
+                joinRequest.getTeam().getId(),
+                joinRequest.getTeam().getTeamName(),
+                member.getId(),
+                member.getUsername(),
+                joinRequest.getStatus(),
+                joinRequest.getCreatedAt()
+        );
+
     }
 
 }

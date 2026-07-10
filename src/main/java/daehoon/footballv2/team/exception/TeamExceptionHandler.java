@@ -78,5 +78,13 @@ public class TeamExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("TEAM_JOIN_REQUEST", ex.getMessage()));
     }
 
+    @ExceptionHandler(NotPendingException.class)
+    public ResponseEntity<TeamErrorResponse> handleNotPendingException(NotPendingException ex) {
+        log.warn("TeamJoinRequest Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_PENDING_STATUS", ex.getMessage()));
+    }
+
+
 
 }

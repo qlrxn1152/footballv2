@@ -1,5 +1,6 @@
 package daehoon.footballv2.team.domain;
 
 public enum TeamJoinRequestStatus {
-    PENDING, ACCEPTED, REJECTED;
+    PENDING, ACCEPTED, REJECTED, CANCELED;
+
 }
