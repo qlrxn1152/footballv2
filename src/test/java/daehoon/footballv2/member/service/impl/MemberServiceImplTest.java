@@ -344,6 +344,7 @@ class MemberServiceImplTest {
         assertThatThrownBy(() -> memberService.leaveTeam(999L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패.");
+
     }
 
 
