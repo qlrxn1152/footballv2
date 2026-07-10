@@ -3,6 +3,7 @@ package daehoon.footballv2.member.service.impl;
 import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
 import daehoon.footballv2.member.dto.response.MemberDetailResponse;
+import daehoon.footballv2.member.dto.response.MemberMeResponse;
 import daehoon.footballv2.member.dto.response.MemberRankingResponse;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.service.MemberService;
@@ -97,6 +98,58 @@ class MemberServiceImplTest {
     @Test
     @DisplayName(value = "존재하지 않는 memberId")
     void findMemberDetailNotExistMemberId() throws Exception {
+
+        // when && then
+        assertThatThrownBy(() -> memberService.findMemberDetail(9999L))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
+
+    @Test
+    @DisplayName(value = "팀이 있는 회원 마이페이지")
+    void findMyInfo() throws Exception {
+        // given
+        SignupResponse member = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        // when
+        MemberMeResponse response = memberService.findMyInfo(member.getMemberId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getUsername()).isEqualTo("userA");
+        assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getTeamName()).isEqualTo("teamA");
+        assertThat(response.getTeamRole()).isEqualTo(TeamRole.LEADER);
+        assertThat(response.getCreatedAt()).isNotNull();
+        assertThat(response.getJoinedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName(value = "팀이 없는 회원 마이페이지")
+    void findMyInfoNoTeam() throws Exception {
+        // given
+        SignupResponse member = authService.signup("userA", "1234");
+
+        // when
+        MemberMeResponse response = memberService.findMyInfo(member.getMemberId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getUsername()).isEqualTo("userA");
+        assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getTeamId()).isNull();
+        assertThat(response.getTeamName()).isNull();
+        assertThat(response.getTeamRole()).isNull();
+        assertThat(response.getCreatedAt()).isNotNull();
+        assertThat(response.getJoinedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 memberId_마이페이지")
+    void findMyInfoNotExistMemberId() throws Exception {
 
         // when && then
         assertThatThrownBy(() -> memberService.findMemberDetail(9999L))

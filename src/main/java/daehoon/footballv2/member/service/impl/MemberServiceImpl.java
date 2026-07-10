@@ -2,6 +2,7 @@ package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
 import daehoon.footballv2.member.dto.response.MemberDetailResponse;
+import daehoon.footballv2.member.dto.response.MemberMeResponse;
 import daehoon.footballv2.member.dto.response.MemberRankingResponse;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
@@ -79,6 +80,37 @@ public class MemberServiceImpl implements MemberService {
 
         TeamMember teamMember = optTeamMember.get();
         return new MemberDetailResponse(
+                member.getId(),
+                member.getUsername(),
+                member.getMemberRating(),
+                teamMember.getTeam().getId(),
+                teamMember.getTeam().getTeamName(),
+                teamMember.getTeamRole(),
+                teamMember.getJoinedAt(),
+                member.getCreatedAt()
+        );
+
+    }
+
+    @Override
+    public MemberMeResponse findMyInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+
+        Optional<TeamMember> optTeamMember = teamMemberRepository.findByMemberId(memberId);
+
+
+        if (optTeamMember.isEmpty()) { // 팀에 속해있지 않는 멤버.
+            return new MemberMeResponse(
+                    member.getId(),
+                    member.getUsername(),
+                    member.getMemberRating(),
+                    member.getCreatedAt()
+            );
+        }
+
+        TeamMember teamMember = optTeamMember.get();
+        return new MemberMeResponse(
                 member.getId(),
                 member.getUsername(),
                 member.getMemberRating(),
