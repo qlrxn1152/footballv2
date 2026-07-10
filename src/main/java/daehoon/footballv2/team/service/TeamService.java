@@ -24,10 +24,13 @@ public interface TeamService {
 
     List<TeamJoinRequestSummaryResponse> findJoinRequests(Long teamId, Long leaderMemberId, TeamJoinRequestStatus status);
 
+    List<TeamJoinRequestSummaryResponse> findPendingJoinRequests(Long teamId, Long memberId);
+
     List<TeamMemberSummaryResponse> findTeamMembers(Long teamId);
 
     TeamDetailResponse findTeamDetail(Long teamId);
 
     List<TeamSummaryResponse> findTeams();
+
 
 }

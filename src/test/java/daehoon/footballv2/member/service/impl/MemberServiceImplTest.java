@@ -5,8 +5,10 @@ import daehoon.footballv2.auth.service.AuthService;
 import daehoon.footballv2.member.dto.response.MemberDetailResponse;
 import daehoon.footballv2.member.dto.response.MemberMeResponse;
 import daehoon.footballv2.member.dto.response.MemberRankingResponse;
+import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.service.MemberService;
+import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
@@ -152,9 +154,34 @@ class MemberServiceImplTest {
     void findMyInfoNotExistMemberId() throws Exception {
 
         // when && then
-        assertThatThrownBy(() -> memberService.findMemberDetail(9999L))
+        assertThatThrownBy(() -> memberService.findMyInfo(9999L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "해당멤버가 팀 가입신청한 요청들 조회 ( PENDING 만 우선 조회. )")
+    void findMyTeamJoinRequest() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());// memberA -> teamA 생성.
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        SignupResponse memberC = authService.signup("userC", "1234");
+        SignupResponse memberD = authService.signup("userD", "1234");
+
+
+        teamService.joinRequest(team.getTeamId(), memberC.getMemberId()); // memberC -> teamA 에 가입신청.
+        teamService.joinRequest(teamB.getTeamId(), memberC.getMemberId()); // memberC -> teamB 에 가입신청.
+
+        // when
+        List<MyTeamJoinRequestResponse> response = memberService.findMyTeamJoinRequests(memberC.getMemberId(), TeamJoinRequestStatus.PENDING);// teamA, teamB 에 대한 ..
+
+        // then
+        assertThat(response.size()).isEqualTo(2);
+        assertThat(response).allMatch(request -> request.getStatus() == TeamJoinRequestStatus.PENDING);
     }
 
 

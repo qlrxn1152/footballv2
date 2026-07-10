@@ -10,7 +10,9 @@ public interface TeamJoinRequestRepository extends JpaRepository<TeamJoinRequest
 
     boolean existsByTeamIdAndMemberIdAndStatus(Long teamId, Long memberId, TeamJoinRequestStatus status);
 
-    List<TeamJoinRequest> findByTeamIdAndStatusOrderByCreatedAtDesc(Long teamId, TeamJoinRequestStatus status);
+    List<TeamJoinRequest> findAllByTeamIdAndStatusOrderByCreatedAtDesc(Long teamId, TeamJoinRequestStatus status);
+
+    List<TeamJoinRequest> findAllByMemberIdAndStatusOrderByCreatedAtDesc(Long memberId, TeamJoinRequestStatus status);
 
 
 }

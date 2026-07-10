@@ -145,7 +145,7 @@ public class TeamServiceImpl implements TeamService {
             throw new NotTeamLeaderException("팀장이 아닙니다.");
         }
 
-        return teamJoinRequestRepository.findByTeamIdAndStatusOrderByCreatedAtDesc(teamId, status)
+        return teamJoinRequestRepository.findAllByTeamIdAndStatusOrderByCreatedAtDesc(teamId, status)
                 .stream()
                 .map(request -> new TeamJoinRequestSummaryResponse(
                         request.getId(),
@@ -156,6 +156,14 @@ public class TeamServiceImpl implements TeamService {
                         request.getStatus(),
                         request.getCreatedAt()
                 ))
+                .toList();
+    }
+
+    @Override
+    public List<TeamJoinRequestSummaryResponse> findPendingJoinRequests(Long teamId, Long memberId) {
+        return this.findJoinRequests(teamId, memberId, TeamJoinRequestStatus.PENDING)
+                .stream()
+                .filter(request -> request.getStatus() == TeamJoinRequestStatus.PENDING)
                 .toList();
     }
 

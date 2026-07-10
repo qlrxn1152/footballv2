@@ -26,6 +26,7 @@ public class TeamController {
 
     private final TeamService teamService;
 
+    // 팀 생성
     @PostMapping("/api/teams")
     public ResponseEntity<TeamCreateResponse> createTeam(@Valid @RequestBody TeamCreateRequest teamCreateRequest, @RequestHeader("X-MEMBER-ID") Long memberId) {
         TeamCreateResponse response = teamService.createTeam(teamCreateRequest.getTeamName(), memberId);
@@ -85,10 +86,13 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 팀 목록
     @GetMapping("/api/teams")
     public ResponseEntity<List<TeamSummaryResponse>> teams() {
         List<TeamSummaryResponse> response = teamService.findTeams();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+
 }

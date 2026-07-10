@@ -1,4 +1,4 @@
-package daehoon.footballv2.team.dto.response.teamjoinrequest;
+package daehoon.footballv2.member.dto.response;
 
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import lombok.Getter;
@@ -9,17 +9,19 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 @NoArgsConstructor
-public class TeamJoinRequestSummaryResponse {
+public class MyTeamJoinRequestResponse {
 
     private Long teamJoinRequestId;
     private Long teamId;
     private String teamName;
+
     private Long memberId;
     private String username;
+
     private TeamJoinRequestStatus status;
     private LocalDateTime createdAt;
 
-    public TeamJoinRequestSummaryResponse(Long teamJoinRequestId, Long teamId, String teamName, Long memberId, String username, TeamJoinRequestStatus status, LocalDateTime createdAt) {
+    public MyTeamJoinRequestResponse(Long teamJoinRequestId, Long teamId, String teamName, Long memberId, String username, TeamJoinRequestStatus status, LocalDateTime createdAt) {
         this.teamJoinRequestId = teamJoinRequestId;
         this.teamId = teamId;
         this.teamName = teamName;
@@ -28,6 +30,4 @@ public class TeamJoinRequestSummaryResponse {
         this.status = status;
         this.createdAt = createdAt;
     }
-
-
 }

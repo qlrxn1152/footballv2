@@ -363,6 +363,8 @@ class TeamServiceImplTest {
         assertThat(requests).hasSize(2);
     }
 
+
+
     // 가입요청들 조회
     @Test
     @DisplayName(value = "status 에 따라 가입신청들 조회 ( REJECTED )")

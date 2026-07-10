@@ -4,11 +4,15 @@ import daehoon.footballv2.member.domain.Member;
 import daehoon.footballv2.member.dto.response.MemberDetailResponse;
 import daehoon.footballv2.member.dto.response.MemberMeResponse;
 import daehoon.footballv2.member.dto.response.MemberRankingResponse;
+import daehoon.footballv2.member.dto.response.MyTeamJoinRequestResponse;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.member.service.MemberService;
+import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamMember;
+import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
+import daehoon.footballv2.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final TeamJoinRequestRepository teamJoinRequestRepository;
 
     @Override
     public List<MemberRankingResponse> membersRanking() {
@@ -121,6 +126,23 @@ public class MemberServiceImpl implements MemberService {
                 member.getCreatedAt()
         );
 
+    }
+
+    @Override
+    public List<MyTeamJoinRequestResponse> findMyTeamJoinRequests(Long memberId, TeamJoinRequestStatus status) {
+
+        return teamJoinRequestRepository.findAllByMemberIdAndStatusOrderByCreatedAtDesc(memberId, status)
+                .stream()
+                .map(request -> new MyTeamJoinRequestResponse(
+                        request.getId(),
+                        request.getTeam().getId(),
+                        request.getTeam().getTeamName(),
+                        request.getMember().getId(),
+                        request.getMember().getUsername(),
+                        request.getStatus(),
+                        request.getCreatedAt()
+                ))
+                .toList();
     }
 
 }
