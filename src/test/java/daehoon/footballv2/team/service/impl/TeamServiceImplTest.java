@@ -2,7 +2,7 @@ package daehoon.footballv2.team.service.impl;
 
 import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
-import daehoon.footballv2.member.exception.NotFoundMemberException;
+import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.team.domain.TeamJoinRequest;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.domain.TeamMember;

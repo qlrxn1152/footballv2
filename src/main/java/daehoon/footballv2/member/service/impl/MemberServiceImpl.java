@@ -1,19 +1,18 @@
 package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
+import daehoon.footballv2.member.dto.response.MemberDetailResponse;
 import daehoon.footballv2.member.dto.response.MemberRankingResponse;
-import daehoon.footballv2.member.exception.NotFoundMemberException;
+import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.member.service.MemberService;
 import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -30,8 +29,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<MemberRankingResponse> membersRanking() {
         List<Member> members = memberRepository.findAllByOrderByMemberRatingDesc();
-
-
         // members -> 모든 리스트를 읽음. ( 1번 )
         return IntStream.range(0, members.size())
                 .mapToObj(index -> {
@@ -62,6 +59,36 @@ public class MemberServiceImpl implements MemberService {
                     );
                 })
                 .toList();
+    }
+
+    @Override
+    public MemberDetailResponse findMemberDetail(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));// 멤버 정보만 가지고있음
+
+        Optional<TeamMember> optTeamMember = teamMemberRepository.findByMemberId(memberId);
+
+        if (optTeamMember.isEmpty()) { // 팀에 속해있지 않는 멤버.
+            return new MemberDetailResponse(
+                    member.getId(),
+                    member.getUsername(),
+                    member.getMemberRating(),
+                    member.getCreatedAt()
+            );
+        }
+
+        TeamMember teamMember = optTeamMember.get();
+        return new MemberDetailResponse(
+                member.getId(),
+                member.getUsername(),
+                member.getMemberRating(),
+                teamMember.getTeam().getId(),
+                teamMember.getTeam().getTeamName(),
+                teamMember.getTeamRole(),
+                teamMember.getJoinedAt(),
+                member.getCreatedAt()
+        );
+
     }
 
 }

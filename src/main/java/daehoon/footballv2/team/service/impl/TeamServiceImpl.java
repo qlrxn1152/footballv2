@@ -1,7 +1,7 @@
 package daehoon.footballv2.team.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
-import daehoon.footballv2.member.exception.NotFoundMemberException;
+import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.team.domain.*;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
