@@ -15,6 +15,7 @@ import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSumma
 import daehoon.footballv2.team.dto.response.teamleader.TeamLeaderTransferResponse;
 import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamname.TeamNameUpdateResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -690,6 +691,117 @@ class TeamServiceImplTest {
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패");
     }
+
+    @Test
+    @DisplayName(value = "팀 이름 변경 성공")
+    void changeTeamName() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when
+        TeamNameUpdateResponse response = teamService.updateTeamName(teamA.getTeamId(), userA.getMemberId(), "teamB");
+        TeamDetailResponse detailResponse = teamService.findTeamDetail(teamA.getTeamId());
+
+        // then
+        assertThat(response.getTeamId()).isEqualTo(teamA.getTeamId());
+        assertThat(response.getTeamName()).isEqualTo("teamB");
+        assertThat(response.getLeaderMemberId()).isEqualTo(userA.getMemberId());
+        assertThat(response.getLeaderUsername()).isEqualTo("userA");
+
+        assertThat(detailResponse.getTeamName()).isEqualTo("teamB");
+    }
+
+    @Test
+    @DisplayName(value = "팀장이 아닌 회원이 팀이름 변경 시도")
+    void changeTeamName_notTeamLeader() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(teamA.getTeamId(), userB.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), teamA.getTeamId(), userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userB.getMemberId(), "teamB"))
+                .isInstanceOf(NotTeamLeaderException.class)
+                .hasMessage("팀장이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른팀 팀장이 팀이름 변경 시도")
+    void changeTeamName_otherTeamLeader() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+        teamService.createTeam("teamB", userB.getMemberId());
+
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userB.getMemberId(), "teamB"))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
+    }
+
+    @Test
+    @DisplayName(value = "팀이름 중복")
+    void changeTeamName_duplicateTeamName() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+        teamService.createTeam("teamB", userB.getMemberId());
+
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userA.getMemberId(), "teamB"))
+                .isInstanceOf(DuplicateTeamNameException.class)
+                .hasMessage("팀 이름 중복");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 팀")
+    void changeTeamName_notExistTeam() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(999L, userA.getMemberId(), "teamB"))
+                .isInstanceOf(NotFoundTeamException.class)
+                .hasMessage("팀 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 회원")
+    void changeTeamName_notExistMember() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), 999L, "teamB"))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "해당팀장이 같은이름으로 변경시도")
+    void changeTeamName_duplicateTeamName2() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userA.getMemberId(), "teamA"))
+                .isInstanceOf(SameTeamNameException.class)
+                .hasMessage("같은 팀이름으로 변경은 불가능합니다.");
+    }
+
+
 
 
 

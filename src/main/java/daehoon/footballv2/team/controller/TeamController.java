@@ -3,6 +3,7 @@ package daehoon.footballv2.team.controller;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.dto.request.teamcreate.TeamCreateRequest;
 import daehoon.footballv2.team.dto.request.teamleader.TeamLeaderTransferRequest;
+import daehoon.footballv2.team.dto.request.teamname.TeamNameUpdateRequest;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
@@ -11,6 +12,7 @@ import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSumma
 import daehoon.footballv2.team.dto.response.teamleader.TeamLeaderTransferResponse;
 import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamname.TeamNameUpdateResponse;
 import daehoon.footballv2.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -103,4 +105,14 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PatchMapping("/api/teams/{teamId}/name")
+    public ResponseEntity<TeamNameUpdateResponse> changeTeamName(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId, @RequestBody TeamNameUpdateRequest request) {
+        // leaderMemberId -> loginMemberId
+        TeamNameUpdateResponse response = teamService.updateTeamName(teamId, leaderMemberId, request.getTeamName());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
 }

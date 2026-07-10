@@ -35,4 +35,8 @@ public class Team {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void changeTeamName(String newTeamName) {
+        this.teamName = newTeamName;
+    }
+
 }

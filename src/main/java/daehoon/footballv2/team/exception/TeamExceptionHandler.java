@@ -92,6 +92,14 @@ public class TeamExceptionHandler {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_LEAVE_TEAMLEADER", ex.getMessage()));
     }
 
+    @ExceptionHandler(SameTeamNameException.class)
+    public ResponseEntity<TeamErrorResponse> handleSameTeamNameException(SameTeamNameException ex) {
+        log.warn("SameTeamName Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("SAME_TEAM_NAME", ex.getMessage()));
+    }
+
+
 
 
 

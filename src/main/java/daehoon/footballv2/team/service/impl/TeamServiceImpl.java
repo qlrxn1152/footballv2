@@ -12,6 +12,7 @@ import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSumma
 import daehoon.footballv2.team.dto.response.teamleader.TeamLeaderTransferResponse;
 import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamname.TeamNameUpdateResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
 import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
@@ -288,6 +289,44 @@ public class TeamServiceImpl implements TeamService {
                 newLeaderMember.getMember().getUsername()
         );
 
+    }
+
+    @Override
+    public TeamNameUpdateResponse updateTeamName(Long teamId, Long leaderMemberId, String newTeamName) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+
+        memberRepository.findById(leaderMemberId)
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+
+        TeamMember teamMember = teamMemberRepository.findByMemberId(leaderMemberId)
+                .orElseThrow(() -> new NotJoinedTeamException("팀에 속한 멤버아닙니다."));
+
+        if (teamMember.getTeam() != team) {
+            throw new NotJoinedTeamException("다른팀 소속입니다.");
+        }
+
+        if ( teamMember.getTeamRole() !=  TeamRole.LEADER) {
+            throw new NotTeamLeaderException("팀장이 아닙니다.");
+        }
+
+        if ( team.getTeamName().equals(newTeamName)) {
+            throw new SameTeamNameException("같은 팀이름으로 변경은 불가능합니다.");
+        }
+
+        if (teamRepository.existsByTeamName(newTeamName)) {
+            throw new DuplicateTeamNameException("팀 이름 중복");
+        }
+
+        team.changeTeamName(newTeamName);
+
+        return new TeamNameUpdateResponse(
+                team.getId(),
+                team.getTeamName(),
+                team.getTeamRating(),
+                teamMember.getMember().getId(),
+                teamMember.getMember().getUsername()
+        );
     }
 
 
