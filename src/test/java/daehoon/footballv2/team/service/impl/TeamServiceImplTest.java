@@ -9,6 +9,7 @@ import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.domain.TeamRole;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
+import daehoon.footballv2.team.dto.response.teamdisband.TeamDisbandResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
@@ -800,6 +801,105 @@ class TeamServiceImplTest {
                 .isInstanceOf(SameTeamNameException.class)
                 .hasMessage("같은 팀이름으로 변경은 불가능합니다.");
     }
+
+    @Test
+    @DisplayName(value = "팀 해체 성공")
+    void disbandTeam() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        // when
+        TeamDisbandResponse response = teamService.disbandTeam(team.getTeamId(), memberA.getMemberId());
+
+        // then
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getTeamName()).isEqualTo("teamA");
+        assertThat(response.getLeaderMemberId()).isEqualTo(memberA.getMemberId());
+        assertThat(response.getLeaderUsername()).isEqualTo("userA");
+        assertThat(response.isDisbanded()).isTrue();
+
+        assertThatThrownBy(() -> teamService.findTeamDetail(team.getTeamId()))
+                .isInstanceOf(NotFoundTeamException.class)
+                .hasMessage("팀 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "팀장이 아닌 회원이 해체 시도")
+    void disbandTeam_notTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberB.getMemberId()))
+                .isInstanceOf(NotTeamLeaderException.class)
+                .hasMessage("팀장이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "팀원이 2명 이상인경우.")
+    void disbandTeam_membersCount() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberA.getMemberId()))
+                .isInstanceOf(CannotDisbandTeamException.class)
+                .hasMessage("팀 해체를 위해서는 팀원이 1명이여야 합니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른 팀 팀장이 해체 시도")
+    void disbandTeam_otherTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+        teamService.createTeam("teamB", memberB.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberB.getMemberId()))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
+    }
+
+    @Test
+    @DisplayName(value = "존재 하지 않는팀 해체 시도")
+    void disbandTeam_notExistTeam() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.disbandTeam(999L, memberA.getMemberId()))
+                .isInstanceOf(NotFoundTeamException.class)
+                .hasMessage("팀 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "존재 하지 않는 멤버가 해체 시도")
+    void disbandTeam_notExistMember() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), 999L))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
+
+
 
 
 

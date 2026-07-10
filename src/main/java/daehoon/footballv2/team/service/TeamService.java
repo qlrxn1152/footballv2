@@ -4,6 +4,7 @@ import daehoon.footballv2.team.domain.TeamJoinRequest;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
+import daehoon.footballv2.team.dto.response.teamdisband.TeamDisbandResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
@@ -37,6 +38,8 @@ public interface TeamService {
     TeamLeaderTransferResponse transferLeader(Long teamId, Long currentLeaderMemberId, Long newLeaderMemberId);
 
     TeamNameUpdateResponse updateTeamName(Long teamId, Long leaderMemberId, String newTeamName);
+
+    TeamDisbandResponse disbandTeam(Long teamId, Long leaderMemberId);
 
 
 }

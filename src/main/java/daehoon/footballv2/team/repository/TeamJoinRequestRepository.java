@@ -14,5 +14,7 @@ public interface TeamJoinRequestRepository extends JpaRepository<TeamJoinRequest
 
     List<TeamJoinRequest> findAllByMemberIdAndStatusOrderByCreatedAtDesc(Long memberId, TeamJoinRequestStatus status);
 
+    void deleteAllByTeamId(Long teamId);
+
 
 }

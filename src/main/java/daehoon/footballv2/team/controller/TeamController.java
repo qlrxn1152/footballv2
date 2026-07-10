@@ -6,6 +6,7 @@ import daehoon.footballv2.team.dto.request.teamleader.TeamLeaderTransferRequest;
 import daehoon.footballv2.team.dto.request.teamname.TeamNameUpdateRequest;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
+import daehoon.footballv2.team.dto.response.teamdisband.TeamDisbandResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
@@ -114,5 +115,12 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DeleteMapping("/api/teams/{teamId}")
+    public ResponseEntity<TeamDisbandResponse> disbandTeam(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId) {
+        // leaderMemberId -> loginMemberId
 
+        TeamDisbandResponse response = teamService.disbandTeam(teamId, leaderMemberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

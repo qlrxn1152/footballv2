@@ -99,6 +99,12 @@ public class TeamExceptionHandler {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("SAME_TEAM_NAME", ex.getMessage()));
     }
 
+    @ExceptionHandler(CannotDisbandTeamException.class)
+    public ResponseEntity<TeamErrorResponse> handleCannotDisbandTeamException(CannotDisbandTeamException ex) {
+        log.warn("Cannot DisbandTeam Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_DISBAND_TEAM", ex.getMessage()));
+    }
 
 
 
