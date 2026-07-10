@@ -896,6 +896,7 @@ class TeamServiceImplTest {
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), 999L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패");
+
     }
 
 
