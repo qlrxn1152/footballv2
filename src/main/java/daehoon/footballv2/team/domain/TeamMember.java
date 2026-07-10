@@ -37,4 +37,13 @@ public class TeamMember {
         this.teamRole = teamRole;
         this.joinedAt = LocalDateTime.now();
     }
+
+    public void leaderToMember() {
+        this.teamRole = TeamRole.MEMBER;
+    }
+
+    public void memberToLeader() {
+        this.teamRole = TeamRole.LEADER;
+    }
+
 }

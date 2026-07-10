@@ -12,6 +12,7 @@ import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamleader.TeamLeaderTransferResponse;
 import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.exception.exceptions.*;
@@ -576,6 +577,120 @@ class TeamServiceImplTest {
         assertThat(teams.get(0).getMemberCount()).isEqualTo(2);
         assertThat(teams.get(0).getLeaderUsername()).isEqualTo("userA");
     }
+
+    @Test
+    @DisplayName(value = "팀장 위임 성공")
+    void transferTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("userA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
+
+        SignupResponse memberB = authService.signup("userB", "1234");
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청
+        teamService.acceptRequest(request.getTeamJoinRequestId(), team.getTeamId(), memberA.getMemberId()); // memberA -> memberB 가 신청한 가입신청 승인
+
+        TeamMember memberATeamMember = teamMemberRepository.findByMemberId(memberA.getMemberId()).get();
+        TeamMember memberBTeamMember = teamMemberRepository.findByMemberId(memberB.getMemberId()).get();
+
+        // when
+        TeamLeaderTransferResponse response = teamService.transferLeader(team.getTeamId(), memberA.getMemberId(), memberB.getMemberId());// memberA -> memberB 로 팀장변경.
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getOldLeaderMemberId()).isEqualTo(memberA.getMemberId());
+        assertThat(response.getNewLeaderMemberId()).isEqualTo(memberB.getMemberId());
+
+        assertThat(memberATeamMember.getTeamRole()).isEqualTo(TeamRole.MEMBER);
+        assertThat(memberBTeamMember.getTeamRole()).isEqualTo(TeamRole.LEADER);
+    }
+
+    @Test
+    @DisplayName(value = "팀장이 아닌 회원이 팀장변경 시도 실패")
+    void transferTeamLeader_notTeamLeader() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+        SignupResponse userC = authService.signup("userC", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(teamA.getTeamId(), userB.getMemberId());
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(teamA.getTeamId(), userC.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), teamA.getTeamId(), userA.getMemberId());
+        teamService.acceptRequest(request2.getTeamJoinRequestId(), teamA.getTeamId(), userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userB.getMemberId(), userC.getMemberId()))
+                .isInstanceOf(NotTeamLeaderException.class)
+                .hasMessage("팀장이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른 팀 회원에게 팀장변경 시도 실패")
+    void transferTeamLeader_notTeamJoinedMember1() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", userB.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("해당 팀의 멤버가 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "팀에 속하지 않은 회원에게 팀장변경 시도 실패")
+    void transferTeamLeader_notTeamJoinedMember2() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        SignupResponse userB = authService.signup("userB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "자기 자신에게 팀장변경 시도 실패")
+    void transferTeamLeader_sameMember() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userA.getMemberId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("같은 회원으로는 변경이 불가능합니다.");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 팀")
+    void transferTeamLeader_notTeam() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(999L, userA.getMemberId(), userA.getMemberId()))
+                .isInstanceOf(NotFoundTeamException.class)
+                .hasMessage("팀 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 새 팀장 회원")
+    void transferTeamLeader_notNewTeamLeader() throws Exception {
+        // given
+        SignupResponse userA = authService.signup("userA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", userA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), 999L))
+                .isInstanceOf(NotFoundMemberException.class)
+                .hasMessage("멤버 조회 실패");
+    }
+
 
 
 

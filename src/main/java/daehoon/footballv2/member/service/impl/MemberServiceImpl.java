@@ -33,6 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private final TeamJoinRequestRepository teamJoinRequestRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<MemberRankingResponse> membersRanking() {
         List<Member> members = memberRepository.findAllByOrderByMemberRatingDesc();
         // members -> 모든 리스트를 읽음. ( 1번 )
@@ -68,6 +69,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MemberDetailResponse findMemberDetail(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));// 멤버 정보만 가지고있음
@@ -98,6 +100,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MemberMeResponse findMyInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
@@ -129,6 +132,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MyTeamJoinRequestResponse> findMyTeamJoinRequests(Long memberId, TeamJoinRequestStatus status) {
 
         return teamJoinRequestRepository.findAllByMemberIdAndStatusOrderByCreatedAtDesc(memberId, status)

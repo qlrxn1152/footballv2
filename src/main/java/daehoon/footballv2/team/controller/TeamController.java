@@ -2,11 +2,13 @@ package daehoon.footballv2.team.controller;
 
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.dto.request.teamcreate.TeamCreateRequest;
+import daehoon.footballv2.team.dto.request.teamleader.TeamLeaderTransferRequest;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.dto.response.teamdetail.TeamDetailResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestDecisionResponse;
 import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestSummaryResponse;
+import daehoon.footballv2.team.dto.response.teamleader.TeamLeaderTransferResponse;
 import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.service.TeamService;
@@ -94,5 +96,11 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 팀장 위임
+    @PatchMapping("/api/teams/{teamId}/leader")
+    public ResponseEntity<TeamLeaderTransferResponse> teamLeaderTransfer(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long currentLeaderMemberId, @RequestBody TeamLeaderTransferRequest request) {
+        TeamLeaderTransferResponse response = teamService.transferLeader(teamId, currentLeaderMemberId, request.getNewLeaderMemberId());
 
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
