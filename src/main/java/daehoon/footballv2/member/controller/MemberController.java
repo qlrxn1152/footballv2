@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,7 +51,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/api/members/mew/team-join-requests/{joinRequestId}/cancel")
+    @PostMapping("/api/members/me/team-join-requests/{joinRequestId}/cancel")
     public ResponseEntity<MyTeamJoinRequestResponse> cancelRequest(@PathVariable Long joinRequestId, @RequestHeader("X-MEMBER-ID") Long memberId) {
         // 해당 멤버의 가입신청들을 조회 -> 단, status = PENDING ..
         // joinRequestId 를 가진 TeamJoinRequest ... ( status = PENDING 이여야함. ) -> 요청 가지고옴 -> 요청 status = CANCELED 로 변경.
