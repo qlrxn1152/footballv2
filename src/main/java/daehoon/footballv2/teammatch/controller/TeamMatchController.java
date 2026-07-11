@@ -3,7 +3,6 @@ package daehoon.footballv2.teammatch.controller;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
 import lombok.RequiredArgsConstructor;
