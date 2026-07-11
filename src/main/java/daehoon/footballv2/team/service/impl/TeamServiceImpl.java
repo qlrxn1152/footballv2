@@ -244,41 +244,21 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamLeaderTransferResponse transferLeader(Long teamId, Long currentLeaderMemberId, Long newLeaderMemberId) {
-        // 팀이 있나?
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+    public TeamLeaderTransferResponse transferLeader(Long teamId, Long oldLeaderMemberId, Long newLeaderMemberId) {
+        Team team = teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(oldLeaderMemberId);
+        teamValidator.validateMemberExists(newLeaderMemberId);
 
-        // 멤버들은 있나 ?
-        Member oldMember = memberRepository.findById(currentLeaderMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+        TeamMember oldLeaderMember = teamValidator.validateJoinedTeam(oldLeaderMemberId);
+        TeamMember newLeaderMember = teamValidator.validateJoinedTeam(newLeaderMemberId);
+        teamValidator.validateSameTeam(oldLeaderMember, teamId);
+        teamValidator.validateSameTeam(newLeaderMember, teamId);
 
-        Member newMember = memberRepository.findById(newLeaderMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+        teamValidator.validateSameMemberForTransferLeader(oldLeaderMemberId, newLeaderMemberId);
 
-        // oldMember -> 해당팀에 속해있나?
-        TeamMember oldLeaderMember = teamMemberRepository.findByMemberId(oldMember.getId())
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
-        if (oldLeaderMember.getTeam() != team) {
-            throw new NotJoinedTeamException("해당 팀의 멤버가 아닙니다.");
-        }
+        teamValidator.validateTeamLeader(oldLeaderMember);
+        teamValidator.validateTeamMember(newLeaderMember);
 
-        // oldMember -> 팀장이 맞나 ?
-        if ( oldLeaderMember.getTeamRole() !=  TeamRole.LEADER) {
-            throw new NotTeamLeaderException("팀장이 아닙니다.");
-        }
-
-
-        // newMember -> 해당팀에 속해있나 ?
-        TeamMember newLeaderMember = teamMemberRepository.findByMemberId(newMember.getId())
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
-        if (newLeaderMember.getTeam() != team) {
-            throw new NotJoinedTeamException("해당 팀의 멤버가 아닙니다.");
-        }
-
-        if (currentLeaderMemberId.equals(newLeaderMemberId)) {
-            throw new IllegalArgumentException("같은 회원으로는 변경이 불가능합니다.");
-        }
 
         // 로그인한 사람이 해당팀의 팀장도 맞고, 새로운멤버가 해당팀의 멤버로 있는경우 -> [oldLeaderMember : LEADER -> MEMBER], [newLeaderMember : MEMBER -> LEADER]
         oldLeaderMember.leaderToMember();

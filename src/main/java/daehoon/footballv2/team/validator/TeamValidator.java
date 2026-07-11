@@ -78,6 +78,17 @@ public class TeamValidator {
     }
 
     /**
+     * 해당 teamMember 객체안에 있는 멤버가, 해당팀의 멤버인지 판단하는 메서드입니다.
+     * @param teamMember
+     * @return 멤버가 아닌경우, NotTeamMemberException 예외를 던집니다.
+     */
+    public void validateTeamMember(TeamMember teamMember) {
+        if ( teamMember.getTeamRole() != TeamRole.MEMBER) {
+            throw new NotTeamMemberException("멤버가 아닙니다.");
+        }
+    }
+
+    /**
      * 팀 이름이 중복인지 확인하는 메서드입니다. ( 이미 teamName 을 팀이름으로 가진 팀이 있는지 판단합니다. )
      * @param teamName
      * @return 팀 이름이 이미 존재 -> DuplicateTeamNameException 예외를 던집니다.
@@ -114,6 +125,19 @@ public class TeamValidator {
         if ( oldTeamName.equals(newTeamName)) {
             throw new SameTeamNameException("같은 팀이름으로 변경은 불가능합니다.");
         }
+    }
+
+    /**
+     * 자기 자신으로 팀장을 변경하는 경우인지 판단하는 메서드입니다.
+     * @param oldLeaderMemberId
+     * @param newLeaderMemberId
+     * @return 다른멤버로 변경하는 경우 통과, 자기자신으로 변경하는 경우에는, CannotTransferLeaderException 예외를 던집니다.
+     */
+    public void validateSameMemberForTransferLeader(Long oldLeaderMemberId, Long newLeaderMemberId) {
+        if ( oldLeaderMemberId.equals(newLeaderMemberId) ) {
+            throw new CannotTransferLeaderException("자기자신으로 팀장 변경은 불가능합니다.");
+        }
+
     }
 
 

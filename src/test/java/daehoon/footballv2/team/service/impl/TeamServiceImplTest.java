@@ -592,7 +592,7 @@ class TeamServiceImplTest {
         TeamMember memberBTeamMember = teamMemberRepository.findByMemberId(memberB.getMemberId()).get();
 
         // when
-        TeamLeaderTransferResponse response = teamService.transferLeader(team.getTeamId(), memberA.getMemberId(), memberB.getMemberId());// memberA -> memberB 로 팀장변경.
+        TeamLeaderTransferResponse response = teamService.transferLeader(team.getTeamId(), memberA.getMemberId(), memberB.getMemberId()); // memberA -> memberB 로 팀장변경.
 
         // then
         assertThat(response).isNotNull();
@@ -634,8 +634,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
-                .hasMessage("해당 팀의 멤버가 아닙니다.");
+                .isInstanceOf(NotSameTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
     }
 
     @Test
@@ -648,8 +648,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessage("멤버 조회 실패");
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("팀에 속해있지 않는 멤버입니다.");
     }
 
     @Test
@@ -661,8 +661,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userA.getMemberId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("같은 회원으로는 변경이 불가능합니다.");
+                .isInstanceOf(CannotTransferLeaderException.class)
+                .hasMessage("자기자신으로 팀장 변경은 불가능합니다.");
     }
 
     @Test

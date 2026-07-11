@@ -106,6 +106,19 @@ public class TeamExceptionHandler {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_DISBAND_TEAM", ex.getMessage()));
     }
 
+    @ExceptionHandler(CannotTransferLeaderException.class)
+    public ResponseEntity<TeamErrorResponse> handleCannotTransferLeaderException(CannotTransferLeaderException ex) {
+        log.warn("Cannot Transfer Leader Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_TRANSFER_LEADER", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotTeamMemberException.class)
+    public ResponseEntity<TeamErrorResponse> handleNotTeamMemberException(NotTeamMemberException ex) {
+        log.warn("Not TeamMember Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("NOT_TEAM_MEMBER", ex.getMessage()));
+    }
 
 
 
