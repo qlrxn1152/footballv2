@@ -26,98 +26,98 @@ public class TeamExceptionHandler {
     public ResponseEntity<TeamErrorResponse> handleDuplicateTeamNameException(DuplicateTeamNameException ex) {
         log.warn("Duplicate TeamName Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("DUPLICATE_TEAM_NAME", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new TeamErrorResponse("DUPLICATE_TEAM_NAME", ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundTeamException.class)
     public ResponseEntity<TeamErrorResponse> handleNotFoundTeamException(NotFoundTeamException ex) {
         log.warn("Not Found Team Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_FOUND_TEAM", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TeamErrorResponse("NOT_FOUND_TEAM", ex.getMessage()));
     }
 
     @ExceptionHandler(DuplicateTeamJoinRequestException.class)
     public ResponseEntity<TeamErrorResponse> handleDuplicateTeamJoinRequestException(DuplicateTeamJoinRequestException ex) {
         log.warn("Duplicate Team Join Request Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("DUPLICATE_TEAM_JOIN_REQUEST", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new TeamErrorResponse("DUPLICATE_TEAM_JOIN_REQUEST", ex.getMessage()));
     }
 
     @ExceptionHandler(NotTeamLeaderException.class)
     public ResponseEntity<TeamErrorResponse> handleNotTeamLeaderException(NotTeamLeaderException ex) {
         log.warn("Not TeamLeader Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_TEAM_LEADER", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TeamErrorResponse("NOT_TEAM_LEADER", ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundTeamJoinRequestException.class)
     public ResponseEntity<TeamErrorResponse> handleNotFoundTeamJoinRequestException(NotFoundTeamJoinRequestException ex) {
         log.warn("Not Found TeamJoinRequest Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_FOUND_TEAM_JOIN_REQUEST", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TeamErrorResponse("NOT_FOUND_TEAM_JOIN_REQUEST", ex.getMessage()));
     }
 
     @ExceptionHandler(NotJoinedTeamException.class)
     public ResponseEntity<TeamErrorResponse> handleNotJoinedTeamException(NotJoinedTeamException ex) {
         log.warn("Not JoinedTeam Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_JOINED_TEAM", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TeamErrorResponse("NOT_JOINED_TEAM", ex.getMessage()));
     }
 
     @ExceptionHandler(NotSameTeamException.class)
     public ResponseEntity<TeamErrorResponse> handleNotSameTeamException(NotSameTeamException ex) {
         log.warn("Not SameTeam Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_SAME_TEAM", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TeamErrorResponse("NOT_SAME_TEAM", ex.getMessage()));
     }
 
     @ExceptionHandler(TeamJoinRequestException.class)
     public ResponseEntity<TeamErrorResponse> handleTeamJoinRequestException(TeamJoinRequestException ex) {
         log.warn("TeamJoinRequest Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("TEAM_JOIN_REQUEST", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("TEAM_JOIN_REQUEST", ex.getMessage()));
     }
 
     @ExceptionHandler(NotPendingException.class)
     public ResponseEntity<TeamErrorResponse> handleNotPendingException(NotPendingException ex) {
         log.warn("Not Pending Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TeamErrorResponse("NOT_PENDING_STATUS", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("NOT_PENDING_STATUS", ex.getMessage()));
     }
 
     @ExceptionHandler(CannotLeaveTeamLeaderException.class)
     public ResponseEntity<TeamErrorResponse> handleCannotLeaveTeamLeaderException(CannotLeaveTeamLeaderException ex) {
         log.warn("Cannot LeaveTeamLeader Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_LEAVE_TEAMLEADER", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("CAN_NOT_LEAVE_TEAMLEADER", ex.getMessage()));
     }
 
     @ExceptionHandler(SameTeamNameException.class)
     public ResponseEntity<TeamErrorResponse> handleSameTeamNameException(SameTeamNameException ex) {
         log.warn("SameTeamName Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("SAME_TEAM_NAME", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("SAME_TEAM_NAME", ex.getMessage()));
     }
 
     @ExceptionHandler(CannotDisbandTeamException.class)
     public ResponseEntity<TeamErrorResponse> handleCannotDisbandTeamException(CannotDisbandTeamException ex) {
         log.warn("Cannot DisbandTeam Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_DISBAND_TEAM", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("CAN_NOT_DISBAND_TEAM", ex.getMessage()));
     }
 
     @ExceptionHandler(CannotTransferLeaderException.class)
     public ResponseEntity<TeamErrorResponse> handleCannotTransferLeaderException(CannotTransferLeaderException ex) {
         log.warn("Cannot Transfer Leader Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("CAN_NOT_TRANSFER_LEADER", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("CAN_NOT_TRANSFER_LEADER", ex.getMessage()));
     }
 
     @ExceptionHandler(NotTeamMemberException.class)
     public ResponseEntity<TeamErrorResponse> handleNotTeamMemberException(NotTeamMemberException ex) {
         log.warn("Not TeamMember Exception: {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new TeamErrorResponse("NOT_TEAM_MEMBER", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("NOT_TEAM_MEMBER", ex.getMessage()));
     }
 
 

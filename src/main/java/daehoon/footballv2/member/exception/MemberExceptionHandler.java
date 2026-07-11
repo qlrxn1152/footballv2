@@ -17,7 +17,7 @@ public class MemberExceptionHandler {
     public ResponseEntity<MemberErrorResponse> handleNotFoundMemberException(NotFoundMemberException ex) {
         log.warn("Not Found Member Exception : {}", ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new MemberErrorResponse("ALREADY_JOINED_TEAM", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MemberErrorResponse("NOT_FOUND_MEMBER", ex.getMessage()));
     }
 
 

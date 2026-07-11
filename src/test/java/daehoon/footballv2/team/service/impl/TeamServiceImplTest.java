@@ -152,7 +152,7 @@ class TeamServiceImplTest {
 
     @Test
     @DisplayName(value = "존재하지 않는 memberId")
-    void teamJoinRequest_fail_notExistsmemberId() throws Exception {
+    void teamJoinRequest_fail_notExistsMemberId() throws Exception {
         // given
         SignupResponse member = authService.signup("userA", "1234");
         TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
