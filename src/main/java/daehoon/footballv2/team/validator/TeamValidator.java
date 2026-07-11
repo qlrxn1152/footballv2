@@ -99,6 +99,8 @@ public class TeamValidator {
         if (memberCount != 1) {
             throw new CannotDisbandTeamException("팀 해체를 위해서는 팀장자신인 1명뿐이여야합니다.");
         }
+
+
     }
 
 

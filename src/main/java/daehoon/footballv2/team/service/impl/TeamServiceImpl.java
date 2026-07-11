@@ -319,37 +319,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamDisbandResponse disbandTeam(Long teamId, Long leaderMemberId) {
-        // 팀조회, 팀장맞는지 ..
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
-
-        memberRepository.findById(leaderMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
-
-        TeamMember teamMember = teamMemberRepository.findByMemberId(leaderMemberId)
-                .orElseThrow(() -> new NotJoinedTeamException("팀에 속한 멤버아닙니다."));
-
-        if (teamMember.getTeam() != team) {
-            throw new NotJoinedTeamException("다른팀 소속입니다.");
-        }
-
-        if ( teamMember.getTeamRole() !=  TeamRole.LEADER) {
-            throw new NotTeamLeaderException("팀장이 아닙니다.");
-        }
-
-        // 팀 멤버가 1명뿐인게 맞나 ? , 1명이면 자기자신이 맞나? ( 팀리더만 남은거 맞음? )
-        int memberCount = teamMemberRepository.countMemberByTeamId(teamId);
-
-
-        if (memberCount != 1) {
-            // 1명이 아님.
-            throw new CannotDisbandTeamException("팀 해체를 위해서는 팀원이 1명이여야 합니다.");
-        }
-
-        if (!teamMember.getMember().getId().equals(leaderMemberId)) {
-            // 너가 속한게 아닌데?
-            throw new CannotDisbandTeamException("자신의 팀만 해체할수있습니다.");
-        }
+        Team team = teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(leaderMemberId);
+        TeamMember teamMember = teamValidator.validateJoinedTeam(leaderMemberId);
+        teamValidator.validateSameTeam(teamMember, teamId);
+        teamValidator.validateTeamLeader(teamMember);
+        teamValidator.validateCanDisbandTeam(teamId);
+        teamValidator.validateSameTeam(teamMember, teamId);
 
         // 가입신청 이력들 삭제
         teamJoinRequestRepository.deleteAllByTeamId(teamId);
@@ -367,8 +343,6 @@ public class TeamServiceImpl implements TeamService {
                 teamMember.getMember().getUsername(),
                 true
         );
-
-
     }
 
 

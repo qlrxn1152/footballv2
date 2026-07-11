@@ -851,7 +851,7 @@ class TeamServiceImplTest {
         // when && then
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberA.getMemberId()))
                 .isInstanceOf(CannotDisbandTeamException.class)
-                .hasMessage("팀 해체를 위해서는 팀원이 1명이여야 합니다.");
+                .hasMessage("팀 해체를 위해서는 팀장자신인 1명뿐이여야합니다.");
     }
 
     @Test
@@ -865,7 +865,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberB.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
