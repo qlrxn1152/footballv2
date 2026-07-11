@@ -33,6 +33,7 @@ public class TeamMatchValidator {
         }
     }
 
+
     public TeamMatch validateTeamMatchExists(Long teamMatchId) {
         return teamMatchRepository.findById(teamMatchId)
                 .orElseThrow(() -> new NotFoundTeamMatchException("매치 조회 실패"));

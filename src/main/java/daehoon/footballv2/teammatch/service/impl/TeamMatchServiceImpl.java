@@ -9,6 +9,7 @@ import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
+import daehoon.footballv2.teammatch.exception.exceptions.NotFoundTeamMatchResultException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.repository.TeamMatchResultRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
@@ -138,21 +139,54 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     .toList();
         }
 
-        // stuats -> MATCHED, COMPLETED .. -> 어웨이팀이 존재
+        // MATCHED -> 매치 결과 점수가 없음.
+        if (status == TeamMatchStatus.MATCHED) {
+            return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(status)
+                    .stream()
+                    .map(teamMatch -> new TeamMatchSummaryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getHomeTeam().getTeamRating(),
+                            teamMatch.getAwayTeam().getId(),
+                            teamMatch.getAwayTeam().getTeamName(),
+                            teamMatch.getAwayTeam().getTeamRating(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
+        }
+
+        // COMPLETED -> 결과 확인가능
         return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(status)
                 .stream()
-                .map(teamMatch -> new TeamMatchSummaryResponse(
-                        teamMatch.getId(),
-                        teamMatch.getHomeTeam().getId(),
-                        teamMatch.getHomeTeam().getTeamName(),
-                        teamMatch.getHomeTeam().getTeamRating(),
-                        teamMatch.getAwayTeam().getId(),
-                        teamMatch.getAwayTeam().getTeamName(),
-                        teamMatch.getAwayTeam().getTeamRating(),
-                        teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
-                ))
+                .map(teamMatch -> {
+                    TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
+                                    .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+
+                    return new TeamMatchSummaryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getHomeTeam().getTeamRating(),
+                            matchResult.getHomeScore(),
+
+                            teamMatch.getAwayTeam().getId(),
+                            teamMatch.getAwayTeam().getTeamName(),
+                            teamMatch.getAwayTeam().getTeamRating(),
+                            matchResult.getAwayScore(),
+
+                            matchResult.getWinnerTeam().getId(),
+                            matchResult.getWinnerTeam().getTeamName(),
+
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    );
+                        })
                 .toList();
+
+
+
     }
 
     @Override

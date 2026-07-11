@@ -70,6 +70,12 @@ public class TeamMatchExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("MATCH_STATUS", ex.getMessage()));
     }
 
+    @ExceptionHandler(NotFoundTeamMatchResultException.class)
+    public ResponseEntity<TeamErrorResponse> handleNotFoundTeamMatchResultException(NotFoundTeamMatchResultException ex) {
+        log.warn("NotFound TeamMatchResult Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TeamErrorResponse("NOT_FOUND_MATCH_RESULT", ex.getMessage()));
+    }
 
 
 }
