@@ -50,17 +50,13 @@ public class TeamMatchController {
     }
 
     @GetMapping("/api/team-matches")
-    public ResponseEntity<List<TeamMatchSummaryResponse>> findTeamMatches(@RequestParam(name = "status") TeamMatchStatus status) {
-
-        List<TeamMatchSummaryResponse> response;
+    public ResponseEntity<List<TeamMatchSummaryResponse>> findTeamMatches(@RequestParam(name = "status", required = false) TeamMatchStatus status) {
 
         if (status == null) {
-            response = teamMatchService.findTeamMatches();
-            return  ResponseEntity.status(HttpStatus.OK).body(response);
+            return  ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches());
         }
 
-        response = teamMatchService.findTeamMatches(status);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches(status));
     }
 
     @PostMapping("/api/team-matches/{teamMatchId}/result")
