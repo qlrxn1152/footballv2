@@ -19,6 +19,7 @@ import daehoon.footballv2.team.repository.TeamJoinRequestRepository;
 import daehoon.footballv2.team.repository.TeamMemberRepository;
 import daehoon.footballv2.team.repository.TeamRepository;
 import daehoon.footballv2.team.service.TeamService;
+import daehoon.footballv2.team.validator.TeamValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,8 @@ public class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRequestRepository teamJoinRequestRepository;
+
+    private final TeamValidator teamValidator;
 
     // 생성요청 ->
     @Override
@@ -294,30 +297,14 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamNameUpdateResponse updateTeamName(Long teamId, Long leaderMemberId, String newTeamName) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+        Team team = teamValidator.validateTeamExists(teamId);// 팀 조회
+        teamValidator.validateMemberExists(leaderMemberId); // 멤버 조회
+        TeamMember teamMember = teamValidator.validateJoinedTeam(leaderMemberId);// 팀에 가입되어져있는지
 
-        memberRepository.findById(leaderMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
-
-        TeamMember teamMember = teamMemberRepository.findByMemberId(leaderMemberId)
-                .orElseThrow(() -> new NotJoinedTeamException("팀에 속한 멤버아닙니다."));
-
-        if (teamMember.getTeam() != team) {
-            throw new NotJoinedTeamException("다른팀 소속입니다.");
-        }
-
-        if ( teamMember.getTeamRole() !=  TeamRole.LEADER) {
-            throw new NotTeamLeaderException("팀장이 아닙니다.");
-        }
-
-        if ( team.getTeamName().equals(newTeamName)) {
-            throw new SameTeamNameException("같은 팀이름으로 변경은 불가능합니다.");
-        }
-
-        if (teamRepository.existsByTeamName(newTeamName)) {
-            throw new DuplicateTeamNameException("팀 이름 중복");
-        }
+        teamValidator.validateSameTeam(teamMember, teamId);
+        teamValidator.validateTeamLeader(teamMember);
+        teamValidator.validateSameTeamName(team.getTeamName(), newTeamName);
+        teamValidator.validateTeamNameNotDuplicate(newTeamName);
 
         team.changeTeamName(newTeamName);
 

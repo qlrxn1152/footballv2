@@ -106,9 +106,6 @@ class TeamServiceImplTest {
                 .hasMessage("멤버 조회 실패");
     }
 
-
-
-
     // 가입신청
     @Test
     @DisplayName(value = "팀 가입신청")
@@ -743,7 +740,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userB.getMemberId(), "teamB"))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -896,7 +893,6 @@ class TeamServiceImplTest {
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), 999L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패");
-
     }
 
 
