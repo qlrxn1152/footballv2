@@ -1,7 +1,8 @@
 package daehoon.footballv2.teammatch.validator;
 
+import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
-import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
+import daehoon.footballv2.teammatch.exception.exceptions.*;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,29 @@ public class TeamMatchValidator {
 
         else if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
             throw new DuplicateTeamMatchException("이미 진행중인 매치가 존재합니다.");
+        }
+    }
+
+    public TeamMatch validateTeamMatchExists(Long teamMatchId) {
+        return teamMatchRepository.findById(teamMatchId)
+                .orElseThrow(() -> new NotFoundTeamMatchException("매치 조회 실패"));
+    }
+
+    public void validatePendingStatus(TeamMatch teamMatch) {
+        if (teamMatch.getStatus() != TeamMatchStatus.PENDING) {
+            throw new NotPendingTeamMatchException("대기 중인 매치만 수락할 수 있습니다.");
+        }
+    }
+
+    public void validateNoActiveMatchForAccept(Long awayTeamId) {
+        if (teamMatchRepository.existsByHomeTeamIdAndStatus(awayTeamId, TeamMatchStatus.PENDING) || teamMatchRepository.existsByHomeTeamIdAndStatus(awayTeamId, TeamMatchStatus.MATCHED)) {
+            throw new AlreadyExistTeamMatchException("이미 진행중인 매치가 있습니다.");
+        }
+    }
+
+    public void validateNotHomeTeam(TeamMatch teamMatch, Long awayTeamId) {
+        if (teamMatch.getHomeTeam().getId().equals(awayTeamId)) {
+            throw new CaannotAcceptOwnTeamMatchException("자기팀이 신청한 매치에는 수락을 할 수 없습니다.");
         }
     }
 

@@ -1,5 +1,6 @@
 package daehoon.footballv2.teammatch.service;
 
+import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
 
@@ -10,4 +11,6 @@ public interface TeamMatchService {
     TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId);
 
     List<TeamMatchPendingResponse> findPendingTeamMatches();
+
+    TeamMatchAcceptResponse acceptTeamMatch(Long teamMatchId, Long awayLeaderMemberId);
 }

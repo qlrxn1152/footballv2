@@ -13,12 +13,12 @@ import daehoon.footballv2.team.repository.TeamRepository;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
-import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
+import daehoon.footballv2.teammatch.exception.exceptions.*;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +26,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -229,6 +227,121 @@ class TeamMatchServiceImplTest {
         assertThat(response.get(1).getTeamMatchId()).isEqualTo(teamMatch.getTeamMatchId());
     }
 
+    @Test
+    @DisplayName(value = "매치 수락 성공")
+    void acceptTeamMatch() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(team.getTeamId(), memberA.getMemberId());
+
+        // when
+        TeamMatchAcceptResponse response = teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId());
+
+        // then
+        assertThat(response.getTeamMatchId()).isEqualTo(teamMatch.getTeamMatchId());
+        assertThat(response.getHomeTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getAwayTeamId()).isEqualTo(teamB.getTeamId());
+        assertThat(response.getStatus()).isEqualTo(TeamMatchStatus.MATCHED);
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 매치 수락 실패")
+    void acceptTeamMatch_notExistTeamMatch() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        teamMatchService.createTeamMatch(team.getTeamId(), memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.acceptTeamMatch(999L, memberB.getMemberId()))
+                .isInstanceOf(NotFoundTeamMatchException.class)
+                .hasMessage("매치 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "팀장이 아닌 회원은 수락 실패")
+    void acceptTeamMatch_notTeamLeader() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamMatchCreateResponse match = teamMatchService.createTeamMatch(team.getTeamId(), memberA.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        SignupResponse memberC = authService.signup("memberC", "1234");
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(teamB.getTeamId(), memberC.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberB.getMemberId());
+
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.acceptTeamMatch(match.getTeamMatchId(), memberC.getMemberId()))
+                .isInstanceOf(NotTeamLeaderException.class)
+                .hasMessage("팀장이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "자기 팀 매치는 수락 실패")
+    void acceptTeamMatch_ownTeam() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamMatchCreateResponse match = teamMatchService.createTeamMatch(team.getTeamId(), memberA.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.acceptTeamMatch(match.getTeamMatchId(), memberA.getMemberId()))
+                .isInstanceOf(CaannotAcceptOwnTeamMatchException.class)
+                .hasMessage("자기팀이 신청한 매치에는 수락을 할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName(value = "PENDING 이 아닌 매치에는 수락 실패")
+    void acceptTeamMatch_notPending() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamMatchCreateResponse match = teamMatchService.createTeamMatch(team.getTeamId(), memberA.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        teamMatchService.acceptTeamMatch(match.getTeamMatchId(), memberB.getMemberId());
+
+        SignupResponse memberC = authService.signup("memberC", "1234");
+        teamService.createTeam("teamC", memberC.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.acceptTeamMatch(match.getTeamMatchId(), memberC.getMemberId()))
+                .isInstanceOf(NotPendingTeamMatchException.class)
+                .hasMessage("대기 중인 매치만 수락할 수 있습니다.");
+    }
+
+    @Test
+    @DisplayName(value = "이미 진행중인 매치가 있는경우 매치 수락 실패 ( PENDING 존재 )")
+    void acceptTeamMatch_AlreadyExistTeamMatch() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse match = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId()); // teamA -> 매치등록
+        TeamMatchCreateResponse match2 = teamMatchService.createTeamMatch(teamB.getTeamId(), memberB.getMemberId()); // teamB -> 매칭등록.
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.acceptTeamMatch(match.getTeamMatchId(), memberB.getMemberId())) // memberB -> teamA 에 매치수락 ( memberB, teamB 는 이미 진행중인 매치가 있으므로, 테스트에 실패해야한다.)
+                .isInstanceOf(AlreadyExistTeamMatchException.class)
+                .hasMessage("이미 진행중인 매치가 있습니다.");
+    }
 
 
 

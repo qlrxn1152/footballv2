@@ -4,9 +4,10 @@ import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
-import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
+import daehoon.footballv2.teammatch.exception.exceptions.AlreadyExistTeamMatchException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
 import daehoon.footballv2.teammatch.validator.TeamMatchValidator;
@@ -57,6 +58,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamMatchPendingResponse> findPendingTeamMatches() {
         return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(TeamMatchStatus.PENDING)
                 .stream()
@@ -69,6 +71,34 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public TeamMatchAcceptResponse acceptTeamMatch(Long teamMatchId, Long awayLeaderMemberId) {
+        TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId); // teamMatch 가 있나?
+        teamValidator.validateMemberExists(awayLeaderMemberId); // 멤버는있는건가?
+        TeamMember awayTeamLeaderMember = teamValidator.validateJoinedTeam(awayLeaderMemberId); // 멤버가 팀이 있는게 맞아 ?
+        teamValidator.validateTeamLeader(awayTeamLeaderMember); // 멤버가 팀장인건 맞고?
+        teamMatchValidator.validatePendingStatus(teamMatch); // teamMatch 가 PENDING 상태인거 맞나 ?
+        teamMatchValidator.validateNotHomeTeam(teamMatch, awayTeamLeaderMember.getTeam().getId()); // 자기팀에 신청하는거 아님?
+
+        teamMatchValidator.validateNoActiveMatchForAccept(awayTeamLeaderMember.getTeam().getId()); // 어웨이팀이 이미 진행중인 매치가 있는게 아니야? -> PENDING, MATCHED 인게 이미 있는거아니야?
+
+
+        teamMatch.matchedTheMatch(awayTeamLeaderMember.getTeam()); // 매칭성사 -> awayTeam 설정, MATCHED 로 변경
+
+        return new TeamMatchAcceptResponse(
+                teamMatch.getId(),
+                teamMatch.getHomeTeam().getId(),
+                teamMatch.getHomeTeam().getTeamName(),
+                teamMatch.getHomeTeam().getTeamRating(),
+                awayTeamLeaderMember.getTeam().getId(),
+                awayTeamLeaderMember.getTeam().getTeamName(),
+                awayTeamLeaderMember.getTeam().getTeamRating(),
+                teamMatch.getStatus()
+        );
 
     }
+
+
 }
