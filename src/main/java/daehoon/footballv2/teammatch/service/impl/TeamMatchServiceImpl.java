@@ -7,6 +7,7 @@ import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.exception.exceptions.AlreadyExistTeamMatchException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
@@ -58,22 +59,6 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<TeamMatchPendingResponse> findPendingTeamMatches() {
-        return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(TeamMatchStatus.PENDING)
-                .stream()
-                .map(teamMatch -> new TeamMatchPendingResponse(
-                        teamMatch.getId(),
-                        teamMatch.getHomeTeam().getId(),
-                        teamMatch.getHomeTeam().getTeamName(),
-                        teamMatch.getHomeTeam().getTeamRating(),
-                        teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
-                ))
-                .toList();
-    }
-
-    @Override
     public TeamMatchAcceptResponse acceptTeamMatch(Long teamMatchId, Long awayLeaderMemberId) {
         TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId); // teamMatch 가 있나?
         teamValidator.validateMemberExists(awayLeaderMemberId); // 멤버는있는건가?
@@ -97,6 +82,58 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 awayTeamLeaderMember.getTeam().getTeamRating(),
                 teamMatch.getStatus()
         );
+
+    }
+
+    @Override
+    public List<TeamMatchSummaryResponse> findTeamMatches() {
+        return teamMatchRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(teamMatch -> new TeamMatchSummaryResponse(
+                        teamMatch.getId(),
+                        teamMatch.getHomeTeam().getId(),
+                        teamMatch.getHomeTeam().getTeamName(),
+                        teamMatch.getHomeTeam().getTeamRating(),
+                        teamMatch.getStatus(),
+                        teamMatch.getCreatedAt()
+                ))
+                .toList();
+    }
+
+
+    @Override
+    public List<TeamMatchSummaryResponse> findTeamMatches(TeamMatchStatus status) {
+
+        // status -> PENDING
+        if (status == TeamMatchStatus.PENDING) {
+            return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(status)
+                    .stream()
+                    .map(teamMatch -> new TeamMatchSummaryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getHomeTeam().getTeamRating(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
+        }
+
+        // stuats -> MATCHED, COMPLETED .. -> 어웨이팀이 존재
+        return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(status)
+                .stream()
+                .map(teamMatch -> new TeamMatchSummaryResponse(
+                        teamMatch.getId(),
+                        teamMatch.getHomeTeam().getId(),
+                        teamMatch.getHomeTeam().getTeamName(),
+                        teamMatch.getHomeTeam().getTeamRating(),
+                        teamMatch.getAwayTeam().getId(),
+                        teamMatch.getAwayTeam().getTeamName(),
+                        teamMatch.getAwayTeam().getTeamRating(),
+                        teamMatch.getStatus(),
+                        teamMatch.getCreatedAt()
+                ))
+                .toList();
 
     }
 

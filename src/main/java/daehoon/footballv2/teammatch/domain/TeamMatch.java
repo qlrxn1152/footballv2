@@ -48,4 +48,8 @@ public class TeamMatch {
         this.status = TeamMatchStatus.MATCHED;
     }
 
+    public void completedMatch() {
+        this.status = TeamMatchStatus.COMPLETED;
+    }
+
 }

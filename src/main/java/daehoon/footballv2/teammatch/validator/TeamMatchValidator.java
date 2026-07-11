@@ -45,6 +45,10 @@ public class TeamMatchValidator {
         if (teamMatchRepository.existsByHomeTeamIdAndStatus(awayTeamId, TeamMatchStatus.PENDING) || teamMatchRepository.existsByHomeTeamIdAndStatus(awayTeamId, TeamMatchStatus.MATCHED)) {
             throw new AlreadyExistTeamMatchException("이미 진행중인 매치가 있습니다.");
         }
+
+        if (teamMatchRepository.existsByAwayTeamIdAndStatus(awayTeamId, TeamMatchStatus.PENDING) || teamMatchRepository.existsByAwayTeamIdAndStatus(awayTeamId, TeamMatchStatus.MATCHED)) {
+            throw new AlreadyExistTeamMatchException("이미 진행중인 매치가 있습니다.");
+        }
     }
 
     public void validateNotHomeTeam(TeamMatch teamMatch, Long awayTeamId) {

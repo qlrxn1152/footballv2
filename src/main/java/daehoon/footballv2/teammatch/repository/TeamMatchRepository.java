@@ -11,8 +11,10 @@ public interface TeamMatchRepository extends JpaRepository<TeamMatch, Long> {
 
     boolean existsByHomeTeamIdAndStatus(Long homeTeamId, TeamMatchStatus status);
 
+    boolean existsByAwayTeamIdAndStatus(Long awayTeamId, TeamMatchStatus status);
+
     List<TeamMatch> findAllByStatusOrderByCreatedAtDesc(TeamMatchStatus status);
 
-    boolean existsByAwayTeamIdAndStatus(Long awayTeamId, TeamMatchStatus status);
+    List<TeamMatch> findAllByOrderByCreatedAtDesc();
 
 }
