@@ -84,6 +84,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamMatchSummaryResponse> findTeamMatches() { // 전체조회 ..
         return teamMatchRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
@@ -115,6 +116,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamMatchSummaryResponse> findTeamMatches(TeamMatchStatus status) {
 
         // status -> PENDING
