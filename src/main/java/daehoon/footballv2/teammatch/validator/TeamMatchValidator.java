@@ -1,9 +1,11 @@
 package daehoon.footballv2.teammatch.validator;
 
+import daehoon.footballv2.team.exception.exceptions.NotSameTeamException;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.exception.exceptions.*;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
+import daehoon.footballv2.teammatch.repository.TeamMatchResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class TeamMatchValidator {
 
     private final TeamMatchRepository teamMatchRepository;
+    private final TeamMatchResultRepository teamMatchResultRepository;
 
     /**
      * 해당팀이 이미 매치를 올린게아닌지 즉, 매치가 이미 진행중인게 아닌지 판단. ( 해당팀이 이미 status = PENDING 또는, MATCHED 인 매치가 있는지 판단 )
@@ -54,6 +57,34 @@ public class TeamMatchValidator {
     public void validateNotHomeTeam(TeamMatch teamMatch, Long awayTeamId) {
         if (teamMatch.getHomeTeam().getId().equals(awayTeamId)) {
             throw new CaannotAcceptOwnTeamMatchException("자기팀이 신청한 매치에는 수락을 할 수 없습니다.");
+        }
+    }
+
+    public void validateMatchedStatus(TeamMatch teamMatch) {
+        if (teamMatch.getStatus() != TeamMatchStatus.MATCHED) {
+            throw new TeamMatchStatusException("매치결과를 입력하기위해서는, 해당 매치가 MATCHED 상태여야 합니다.");
+        }
+    }
+
+    public void validateResultNotExists(TeamMatch teamMatch) {
+        if (teamMatchResultRepository.existsByTeamMatchId(teamMatch.getId())) {
+            throw new AlreadyExistMatchResultException("이미 결과가 입력된 매치입니다.");
+        }
+    }
+
+    public void validateScore(Integer homeScore, Integer awayScore) {
+        if ( homeScore == null || awayScore == null ) {
+            throw new TeamMatchResultScoreException("점수는 null 일 수 없습니다.");
+        }
+
+        else if ( homeScore < 0 || awayScore < 0 ) {
+            throw new TeamMatchResultScoreException("점수는 음수일 수 없습니다.");
+        }
+    }
+
+    public void validateParticipantTeam(TeamMatch teamMatch, Long requestTeamId) {
+        if (!teamMatch.getHomeTeam().getId().equals(requestTeamId)) {
+            throw new NotSameTeamException("해당 매치에 참여한 팀이 아닙니다.");
         }
     }
 

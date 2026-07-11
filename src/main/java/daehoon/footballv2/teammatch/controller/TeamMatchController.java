@@ -1,10 +1,14 @@
 package daehoon.footballv2.teammatch.controller;
 
+import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchResultCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +23,7 @@ import java.util.List;
 public class TeamMatchController {
 
     private final TeamMatchService teamMatchService;
+    private final TeamService teamService;
 
     @PostMapping("/api/teams/{teamId}/matches")
     public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long memberId) {
@@ -56,5 +61,15 @@ public class TeamMatchController {
 
         response = teamMatchService.findTeamMatches(status);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/api/team-matches/{teamMatchId}/result")
+    public ResponseEntity<TeamMatchResultResponse> matchResult(@PathVariable Long teamMatchId, @RequestHeader("X-MEMBER-ID") Long memberId, @Valid @RequestBody TeamMatchResultCreateRequest request) {
+        // memberId -> 홈팀의 팀장이여야함.
+
+        TeamMatchResultResponse response = teamMatchService.registerMatchResult(teamMatchId, memberId, request.getHomeScore(), request.getAwayScore());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 }

@@ -15,6 +15,7 @@ import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.exception.exceptions.*;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
@@ -444,6 +445,198 @@ class TeamMatchServiceImplTest {
         // then
         assertThat(response).hasSize(0);
     }
+
+    @Test
+    @DisplayName(value = "매치 결과 등록 성공 - homeTeam 승리")
+    void matchResult_home() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId()); // teamB 가 수락
+
+        // when
+        TeamMatchResultResponse result = teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 3, 1);
+        TeamMatch realTeamMatch = teamMatchRepository.findById(teamMatch.getTeamMatchId()).get();
+
+        // then
+        assertThat(result.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(realTeamMatch.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(result.getWinnerTeamId()).isEqualTo(teamA.getTeamId());
+        assertThat(result.getHomeScore()).isEqualTo(3);
+        assertThat(result.getAwayScore()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName(value = "매치 결과 등록 성공 - awayTeam 승리")
+    void matchResult_away() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId()); // teamB 가 수락
+
+        // when
+        TeamMatchResultResponse result = teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 3, 5);
+        TeamMatch realTeamMatch = teamMatchRepository.findById(teamMatch.getTeamMatchId()).get();
+
+        // then
+        assertThat(result.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(realTeamMatch.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(result.getWinnerTeamId()).isEqualTo(teamB.getTeamId());
+        assertThat(result.getHomeScore()).isEqualTo(3);
+        assertThat(result.getAwayScore()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName(value = "매치 결과 등록 성공 - draw")
+    void matchResult_draw() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId()); // teamB 가 수락
+
+        // when
+        TeamMatchResultResponse result = teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 3, 3);
+        TeamMatch realTeamMatch = teamMatchRepository.findById(teamMatch.getTeamMatchId()).get();
+
+        // then
+        assertThat(result.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(realTeamMatch.getStatus()).isEqualTo(TeamMatchStatus.COMPLETED);
+        assertThat(result.getWinnerTeamId()).isNull();
+        assertThat(result.getWinnerTeamName()).isNull();
+        assertThat(result.getHomeScore()).isEqualTo(3);
+        assertThat(result.getAwayScore()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName(value = "PENDING 매치에 결과입력은 실패해야함")
+    void matchResult_PENDING() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 3, 3))
+                .isInstanceOf(TeamMatchStatusException.class)
+                .hasMessage("매치결과를 입력하기위해서는, 해당 매치가 MATCHED 상태여야 합니다.");
+    }
+
+    @Test
+    @DisplayName(value = "일반회원이 결과입력 실패")
+    void matchResult_member() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        SignupResponse memberC = authService.signup("memberC", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+        TeamJoinRequestCreateResponse request = teamService.joinRequest(teamA.getTeamId(), memberC.getMemberId());
+        teamService.acceptRequest(request.getTeamJoinRequestId(), teamA.getTeamId(),  memberA.getMemberId()); // memberC -> teamA
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberC.getMemberId(), 3, 3))
+                .isInstanceOf(NotTeamLeaderException.class)
+                .hasMessage("팀장이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "점수는 음수이면 안된다")
+    void matchResult_score_neagative() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), -3, 1))
+                .isInstanceOf(TeamMatchResultScoreException.class)
+                .hasMessage("점수는 음수일 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName(value = "점수는 null이면 안된다")
+    void matchResult_score_null() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId());
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), null, 1))
+                .isInstanceOf(TeamMatchResultScoreException.class)
+                .hasMessage("점수는 null 일 수 없습니다.");
+    }
+
+
+
+    @Test
+    @DisplayName(value = "매치 참여 팀이 아닌 다른 팀장은 실패")
+    void matchResult_otherTeam() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        SignupResponse memberC = authService.signup("memberC", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamCreateResponse teamC = teamService.createTeam("teamC", memberC.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId()); //teamB 가 매치 수락 => teamA VS teamB
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberC.getMemberId(), 3, 1))
+                .isInstanceOf(NotSameTeamException.class)
+                .hasMessage("해당 매치에 참여한 팀이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "이미 결과가 등록된 매치에는 결과등록에 실패해야함")
+    void matchResult_alreadyExistMatchResult() throws Exception {
+        // given
+        SignupResponse memberA = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId());// teamA 매치 등록
+        teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId()); // teamB 가 매치 수락
+        teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 3, 3); // teamA 가 매치 결과 등록
+
+        // when && then
+        assertThatThrownBy(() -> teamMatchService.registerMatchResult(teamMatch.getTeamMatchId(), memberA.getMemberId(), 5, 3))
+                .isInstanceOf(AlreadyExistMatchResultException.class)
+                .hasMessage("이미 결과가 입력된 매치입니다.");
+    }
+
+
+
 
 
 

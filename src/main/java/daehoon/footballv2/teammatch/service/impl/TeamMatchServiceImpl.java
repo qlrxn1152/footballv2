@@ -3,11 +3,14 @@ package daehoon.footballv2.teammatch.service.impl;
 import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
+import daehoon.footballv2.teammatch.domain.TeamMatchResult;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
+import daehoon.footballv2.teammatch.repository.TeamMatchResultRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
 import daehoon.footballv2.teammatch.validator.TeamMatchValidator;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import java.util.List;
 public class TeamMatchServiceImpl implements TeamMatchService {
 
     private final TeamMatchRepository teamMatchRepository;
+    private final TeamMatchResultRepository teamMatchResultRepository;
 
     private final TeamValidator teamValidator;
     private final TeamMatchValidator teamMatchValidator;
@@ -149,6 +153,44 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore) {
+        TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);
+        teamValidator.validateMemberExists(homeLeaderMemberId);
+
+        // 이미 해당매치에 결과가 있으면?
+        teamMatchValidator.validateResultNotExists(teamMatch);
+
+        // 매치가 MATCHED 인 상태인게 맞는지
+        teamMatchValidator.validateMatchedStatus(teamMatch);
+
+        TeamMember teamMember = teamValidator.validateJoinedTeam(homeLeaderMemberId); // 멤버가 팀에 가입되어져 있나 ?
+
+        teamValidator.validateTeamLeader(teamMember); // 너 팀장임?
+
+        teamMatchValidator.validateParticipantTeam(teamMatch, teamMember.getTeam().getId()); // 결과등록한 멤버 팀이랑, teamMatch 에 홈팀이랑 같음 ?
+
+        // 점수검증
+        teamMatchValidator.validateScore(homeScore, awayScore);
+
+        // 팀장까지 맞네 -> 결과입력 ㄱㄱ
+        TeamMatchResult matchResult = teamMatchResultRepository.save(new TeamMatchResult(teamMatch, homeScore, awayScore));
+
+        // 매치상태 변경
+        teamMatch.completedMatch();
+
+        return new TeamMatchResultResponse(
+                teamMatch.getId(),
+                teamMatch.getHomeTeam().getId(),
+                teamMatch.getHomeTeam().getTeamName(),
+                matchResult.getHomeScore(),
+                teamMatch.getAwayTeam().getId(),
+                teamMatch.getAwayTeam().getTeamName(),
+                matchResult.getAwayScore(),
+                teamMatch.getStatus()
+        );
 
     }
 

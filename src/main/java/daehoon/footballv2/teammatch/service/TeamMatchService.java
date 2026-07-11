@@ -3,6 +3,7 @@ package daehoon.footballv2.teammatch.service;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 
 import java.util.List;
@@ -17,5 +18,6 @@ public interface TeamMatchService {
 
     List<TeamMatchSummaryResponse> findTeamMatches();
 
+    TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore);
 
 }

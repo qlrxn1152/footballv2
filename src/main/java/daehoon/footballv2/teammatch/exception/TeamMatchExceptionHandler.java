@@ -2,10 +2,7 @@ package daehoon.footballv2.teammatch.exception;
 
 import daehoon.footballv2.team.exception.TeamErrorResponse;
 import daehoon.footballv2.team.exception.exceptions.NotPendingException;
-import daehoon.footballv2.teammatch.exception.exceptions.AlreadyExistTeamMatchException;
-import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
-import daehoon.footballv2.teammatch.exception.exceptions.NotFoundTeamMatchException;
-import daehoon.footballv2.teammatch.exception.exceptions.NotPendingTeamMatchException;
+import daehoon.footballv2.teammatch.exception.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +49,26 @@ public class TeamMatchExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("NOT_PENDING_MATCH", ex.getMessage()));
     }
 
+    @ExceptionHandler(AlreadyExistMatchResultException.class)
+    public ResponseEntity<TeamErrorResponse> handleAlreadyExistMatchResultException(AlreadyExistMatchResultException ex) {
+        log.warn("Already Exist MatchResult Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("ALREADY_EXIST_MATCHRESULT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TeamMatchResultScoreException.class)
+    public ResponseEntity<TeamErrorResponse> handleNotPendingTeamMatchException(TeamMatchResultScoreException ex) {
+        log.warn("TeamMatchResult Score Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("MATCH_RESULT_SCORE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TeamMatchStatusException.class)
+    public ResponseEntity<TeamErrorResponse> handleTeamMatchStatusException(TeamMatchStatusException ex) {
+        log.warn("TeamMatch Status Exception: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamErrorResponse("MATCH_STATUS", ex.getMessage()));
+    }
 
 
 

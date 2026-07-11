@@ -21,6 +21,11 @@ import daehoon.footballv2.team.repository.TeamRepository;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.team.validator.teamjoin.TeamJoinRequestValidator;
+import daehoon.footballv2.teammatch.domain.TeamMatch;
+import daehoon.footballv2.teammatch.domain.TeamMatchResult;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
+import daehoon.footballv2.teammatch.repository.TeamMatchResultRepository;
+import daehoon.footballv2.teammatch.validator.TeamMatchValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,10 +42,12 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRequestRepository teamJoinRequestRepository;
+    private final TeamMatchResultRepository teamMatchResultRepository;
 
     // 검증들
     private final TeamValidator teamValidator;
     private final TeamJoinRequestValidator teamJoinRequestValidator;
+    private final TeamMatchValidator teamMatchValidator;
 
     @Override
     public TeamCreateResponse createTeam(String teamName, Long memberId) {
@@ -319,12 +326,6 @@ public class TeamServiceImpl implements TeamService {
                 true
         );
     }
-
-
-
-
-
-
 
 
     // 비즈니스 로직
