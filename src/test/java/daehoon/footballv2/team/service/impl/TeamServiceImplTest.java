@@ -106,9 +106,6 @@ class TeamServiceImplTest {
                 .hasMessage("멤버 조회 실패");
     }
 
-
-
-
     // 가입신청
     @Test
     @DisplayName(value = "팀 가입신청")
@@ -155,7 +152,7 @@ class TeamServiceImplTest {
 
     @Test
     @DisplayName(value = "존재하지 않는 memberId")
-    void teamJoinRequest_fail_notExistsmemberId() throws Exception {
+    void teamJoinRequest_fail_notExistsMemberId() throws Exception {
         // given
         SignupResponse member = authService.signup("userA", "1234");
         TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
@@ -302,12 +299,12 @@ class TeamServiceImplTest {
         // memberA 자기팀이 아닌, memberB 팀의 요청을 수락 / 거절
         // when && then
         assertThatThrownBy(() -> teamService.acceptRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberA.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
 
 
         assertThatThrownBy(() -> teamService.rejectRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberA.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -428,12 +425,12 @@ class TeamServiceImplTest {
         TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
 
         TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청.
-        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberB -> teamA 가입신청.
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청.
 
         // when && then
-        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessage("멤버 조회 실패");
+        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING)) // memberB -> teamA 가입신청들을 조회 .. [ 팀장만, 가입신청을 조회할수있다. ]
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("팀에 속해있지 않는 멤버입니다.");
     }
 
     // 가입요청들 조회
@@ -452,7 +449,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -476,7 +473,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberD.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -595,7 +592,7 @@ class TeamServiceImplTest {
         TeamMember memberBTeamMember = teamMemberRepository.findByMemberId(memberB.getMemberId()).get();
 
         // when
-        TeamLeaderTransferResponse response = teamService.transferLeader(team.getTeamId(), memberA.getMemberId(), memberB.getMemberId());// memberA -> memberB 로 팀장변경.
+        TeamLeaderTransferResponse response = teamService.transferLeader(team.getTeamId(), memberA.getMemberId(), memberB.getMemberId()); // memberA -> memberB 로 팀장변경.
 
         // then
         assertThat(response).isNotNull();
@@ -637,8 +634,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
-                .hasMessage("해당 팀의 멤버가 아닙니다.");
+                .isInstanceOf(NotSameTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
     }
 
     @Test
@@ -651,8 +648,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userB.getMemberId()))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessage("멤버 조회 실패");
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("팀에 속해있지 않는 멤버입니다.");
     }
 
     @Test
@@ -664,8 +661,8 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.transferLeader(teamA.getTeamId(), userA.getMemberId(), userA.getMemberId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("같은 회원으로는 변경이 불가능합니다.");
+                .isInstanceOf(CannotTransferLeaderException.class)
+                .hasMessage("자기자신으로 팀장 변경은 불가능합니다.");
     }
 
     @Test
@@ -743,7 +740,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.updateTeamName(teamA.getTeamId(), userB.getMemberId(), "teamB"))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -854,7 +851,7 @@ class TeamServiceImplTest {
         // when && then
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberA.getMemberId()))
                 .isInstanceOf(CannotDisbandTeamException.class)
-                .hasMessage("팀 해체를 위해서는 팀원이 1명이여야 합니다.");
+                .hasMessage("팀 해체를 위해서는 팀장자신인 1명뿐이여야합니다.");
     }
 
     @Test
@@ -868,7 +865,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), memberB.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -896,7 +893,6 @@ class TeamServiceImplTest {
         assertThatThrownBy(() -> teamService.disbandTeam(team.getTeamId(), 999L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage("멤버 조회 실패");
-
     }
 
 

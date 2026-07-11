@@ -108,7 +108,7 @@ public class TeamController {
     }
 
     @PatchMapping("/api/teams/{teamId}/name")
-    public ResponseEntity<TeamNameUpdateResponse> changeTeamName(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId, @RequestBody TeamNameUpdateRequest request) {
+    public ResponseEntity<TeamNameUpdateResponse> changeTeamName(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId, @Valid @RequestBody TeamNameUpdateRequest request) {
         // leaderMemberId -> loginMemberId
         TeamNameUpdateResponse response = teamService.updateTeamName(teamId, leaderMemberId, request.getTeamName());
 
