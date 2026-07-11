@@ -2,6 +2,7 @@ package daehoon.footballv2.team.validator.teamjoin;
 
 import daehoon.footballv2.team.domain.TeamJoinRequest;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
+import daehoon.footballv2.team.exception.exceptions.DuplicateTeamJoinRequestException;
 import daehoon.footballv2.team.exception.exceptions.NotFoundTeamJoinRequestException;
 import daehoon.footballv2.team.exception.exceptions.NotSameTeamException;
 import daehoon.footballv2.team.exception.exceptions.TeamJoinRequestException;
@@ -50,4 +51,11 @@ public class TeamJoinRequestValidator {
             throw new TeamJoinRequestException("이미 가입신청을 승인 / 거절한 요청입니다.");
         }
     }
+
+    public void validateDuplicateRequest(Long teamId, Long memberId) {
+        if (teamJoinRequestRepository.existsByTeamIdAndMemberIdAndStatus(teamId, memberId, TeamJoinRequestStatus.PENDING)) {
+            throw new DuplicateTeamJoinRequestException("이미 가입신청한 팀입니다.");
+        }
+    }
+
 }

@@ -52,6 +52,19 @@ public class TeamValidator {
                 .orElseThrow(() -> new NotJoinedTeamException("팀에 속해있지 않는 멤버입니다."));
     }
 
+    /**
+     * 파라미터로 들어온 memberId 로 멤버를 조회해서 해당 멤버가 팀에 안속해있는지 판단하는 메서드입니다.
+     * @param memberId
+     * @return 멤버가 팀이 없을경우 통과, 팀이있으면 -> AlreadyJoinedTeamException 을 던집니다.
+     */
+    public void validateNotJoinedTeam(Long memberId) {
+        if (teamMemberRepository.existsByMemberId(memberId)) {
+            throw new AlreadyJoinedTeamException("이미 팀에 소속된 회원입니다.");
+        }
+    }
+
+
+
 
     /**
      * teamMember 객체안에있는 팀과, 또 다른 파라미터로 들어온 teamId 가 같은지 조회합니다.

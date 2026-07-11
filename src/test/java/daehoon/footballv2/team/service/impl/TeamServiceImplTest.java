@@ -425,12 +425,12 @@ class TeamServiceImplTest {
         TeamCreateResponse team = teamService.createTeam("teamA", memberA.getMemberId()); // memberA -> teamA 생성
 
         TeamJoinRequestCreateResponse request1 = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());// memberB -> teamA 가입신청.
-        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberB -> teamA 가입신청.
+        TeamJoinRequestCreateResponse request2 = teamService.joinRequest(team.getTeamId(), memberC.getMemberId());// memberC -> teamA 가입신청.
 
         // when && then
-        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessage("멤버 조회 실패");
+        assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING)) // memberB -> teamA 가입신청들을 조회 .. [ 팀장만, 가입신청을 조회할수있다. ]
+                .isInstanceOf(NotJoinedTeamException.class)
+                .hasMessage("팀에 속해있지 않는 멤버입니다.");
     }
 
     // 가입요청들 조회
@@ -449,7 +449,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberB.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
@@ -473,7 +473,7 @@ class TeamServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamService.findJoinRequests(team.getTeamId(), memberD.getMemberId(), TeamJoinRequestStatus.PENDING))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 
