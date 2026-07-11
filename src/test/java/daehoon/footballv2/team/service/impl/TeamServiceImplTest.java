@@ -299,12 +299,12 @@ class TeamServiceImplTest {
         // memberA 자기팀이 아닌, memberB 팀의 요청을 수락 / 거절
         // when && then
         assertThatThrownBy(() -> teamService.acceptRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberA.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
 
 
         assertThatThrownBy(() -> teamService.rejectRequest(request.getTeamJoinRequestId(), teamB.getTeamId(), memberA.getMemberId()))
-                .isInstanceOf(NotJoinedTeamException.class)
+                .isInstanceOf(NotSameTeamException.class)
                 .hasMessage("다른팀 소속입니다.");
     }
 

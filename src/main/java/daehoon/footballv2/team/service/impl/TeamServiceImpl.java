@@ -20,6 +20,7 @@ import daehoon.footballv2.team.repository.TeamMemberRepository;
 import daehoon.footballv2.team.repository.TeamRepository;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.team.validator.TeamValidator;
+import daehoon.footballv2.team.validator.teamjoin.TeamJoinRequestValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,9 @@ public class TeamServiceImpl implements TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRequestRepository teamJoinRequestRepository;
 
+    // 검증들
     private final TeamValidator teamValidator;
+    private final TeamJoinRequestValidator teamJoinRequestValidator;
 
     // 생성요청 ->
     @Override
@@ -78,19 +81,20 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamJoinRequestDecisionResponse acceptRequest(Long joinRequestId, Long teamId, Long loginMemberId) {
+        TeamJoinRequest joinRequest = teamJoinRequestValidator.validateJoinRequestExists(joinRequestId);
+        Team team = teamValidator.validateTeamExists(teamId);
         // 팀장이 가입신청을 수락 -> 팀에 멤버
-        TeamJoinRequest joinRequest = teamJoinRequestRepository.findById(joinRequestId)
-                .orElseThrow(() -> new NotFoundTeamJoinRequestException("가입신청 조회 실패"));
 
-        TeamMember teamLeader = teamMemberRepository.findByMemberId(loginMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+        teamValidator.validateMemberExists(loginMemberId);
+        TeamMember teamLeader = teamValidator.validateJoinedTeam(loginMemberId);
 
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+        teamValidator.validateSameTeam(teamLeader, teamId);
+        teamValidator.validateTeamLeader(teamLeader);
+
 
         // 가입요청에 있는 팀이랑, 해당 팀이랑 같은지
-        validateForTeamJoinRequestAcceptOrReject(teamId, joinRequest, teamLeader);
-
+        teamJoinRequestValidator.validateJoinRequestBelongsToTeam(joinRequest, teamId);
+        teamJoinRequestValidator.validatePendingStatus(joinRequest);
 
         // 대상 팀 팀장인거 확인완료. -> 팀에 멤버를 넣어줘야함
         acceptTeamMember(team, joinRequest);
@@ -108,16 +112,20 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamJoinRequestDecisionResponse rejectRequest(Long joinRequestId, Long teamId, Long loginMemberId) {
-        TeamJoinRequest joinRequest = teamJoinRequestRepository.findById(joinRequestId)
-                .orElseThrow(() -> new NotFoundTeamJoinRequestException("가입신청 조회 실패"));
+        TeamJoinRequest joinRequest = teamJoinRequestValidator.validateJoinRequestExists(joinRequestId);
+        Team team = teamValidator.validateTeamExists(teamId);
+        // 팀장이 가입신청을 거절
 
-        TeamMember teamLeader = teamMemberRepository.findByMemberId(loginMemberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+        teamValidator.validateMemberExists(loginMemberId);
+        TeamMember teamLeader = teamValidator.validateJoinedTeam(loginMemberId);
 
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundTeamException("팀 조회 실패"));
+        teamValidator.validateSameTeam(teamLeader, teamId);
+        teamValidator.validateTeamLeader(teamLeader);
 
-        validateForTeamJoinRequestAcceptOrReject(teamId, joinRequest, teamLeader);
+        // 가입요청에 있는 팀이랑, 해당 팀이랑 같은지
+        teamJoinRequestValidator.validateJoinRequestBelongsToTeam(joinRequest, teamId);
+        teamJoinRequestValidator.validatePendingStatus(joinRequest);
+
         rejectTeamMember(joinRequest);
 
         return new TeamJoinRequestDecisionResponse(
@@ -248,13 +256,13 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamValidator.validateTeamExists(teamId);
         teamValidator.validateMemberExists(oldLeaderMemberId);
         teamValidator.validateMemberExists(newLeaderMemberId);
+        teamValidator.validateSameMemberForTransferLeader(oldLeaderMemberId, newLeaderMemberId);
 
         TeamMember oldLeaderMember = teamValidator.validateJoinedTeam(oldLeaderMemberId);
         TeamMember newLeaderMember = teamValidator.validateJoinedTeam(newLeaderMemberId);
         teamValidator.validateSameTeam(oldLeaderMember, teamId);
         teamValidator.validateSameTeam(newLeaderMember, teamId);
 
-        teamValidator.validateSameMemberForTransferLeader(oldLeaderMemberId, newLeaderMemberId);
 
         teamValidator.validateTeamLeader(oldLeaderMember);
         teamValidator.validateTeamMember(newLeaderMember);
@@ -305,7 +313,6 @@ public class TeamServiceImpl implements TeamService {
         teamValidator.validateSameTeam(teamMember, teamId);
         teamValidator.validateTeamLeader(teamMember);
         teamValidator.validateCanDisbandTeam(teamId);
-        teamValidator.validateSameTeam(teamMember, teamId);
 
         // 가입신청 이력들 삭제
         teamJoinRequestRepository.deleteAllByTeamId(teamId);
@@ -326,7 +333,13 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
-    // 비즈니스 로직
+
+
+
+
+
+
+    // 비즈니스 로직 // => // TODO : validator 로 코드 수정후, 아래 검증로직들 삭제
     private void validateForTeamJoinRequestCreate(Long teamId, Long memberId) {
         // 팀에 이미 가입되어져있는지 ?
         if (teamMemberRepository.existsByMemberId(memberId)) {
@@ -345,33 +358,9 @@ public class TeamServiceImpl implements TeamService {
 
     private void acceptTeamMember(Team team, TeamJoinRequest joinRequest) {
         teamMemberRepository.save(new TeamMember(team, joinRequest.getMember(), TeamRole.MEMBER)); // -> 가입승인
-        joinRequest.acceptedRequest();
+        joinRequest.acceptedRequest(); // status = ACCEPTED
     }
 
-    private static void validateForTeamJoinRequestAcceptOrReject(Long teamId, TeamJoinRequest joinRequest, TeamMember teamLeader) {
-        // 가입요청에 있는 팀이랑, 해당 팀이랑 같은지
-        if (!joinRequest.getTeam().getId().equals(teamId)) {
-            throw new NotSameTeamException("팀이 다릅니다.");
-        }
-
-        // PENDING 이 아닌, ACCEPTED, REJECTED -> 즉, 이미 가입신청을 승인했거나 거절한경우.
-        if (!joinRequest.getStatus().equals(TeamJoinRequestStatus.PENDING)) {
-            throw new TeamJoinRequestException("이미 가입신청을 승인 / 거절한 요청입니다.");
-        }
-
-        // 팀장인지 조회 -> 우선 로그인한 사람이 팀 있는건 맞음? , 팀이있다면, 해당팀의 id랑 teamId 가 같나?, 같으면 해당팀 팀장이 맞나?
-        if (teamLeader.getTeam() == null) {
-            throw new NotJoinedTeamException("팀에 속해있지 않습니다.");
-        }
-
-        if (!teamLeader.getTeam().getId().equals(teamId)) {
-            throw new NotJoinedTeamException("다른팀 소속입니다.");
-        }
-
-        if (!teamLeader.getTeamRole().equals(TeamRole.LEADER)) {
-            throw new NotTeamLeaderException("팀장이 아닙니다.");
-        }
-    }
 
     private void validateForCrateTeam(String teamName, Long memberId) {
         // 팀 이름이 이미 존재하는지 ?
