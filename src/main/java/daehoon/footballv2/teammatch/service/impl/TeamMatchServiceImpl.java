@@ -1,5 +1,6 @@
 package daehoon.footballv2.teammatch.service.impl;
 
+import daehoon.footballv2.team.domain.Team;
 import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
@@ -164,6 +165,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
                                     .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
 
+
                     return new TeamMatchSummaryResponse(
                             teamMatch.getId(),
                             teamMatch.getHomeTeam().getId(),
@@ -176,8 +178,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                             teamMatch.getAwayTeam().getTeamRating(),
                             matchResult.getAwayScore(),
 
-                            matchResult.getWinnerTeam().getId(),
-                            matchResult.getWinnerTeam().getTeamName(),
+                            matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
+                            matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
 
                             teamMatch.getStatus(),
                             teamMatch.getCreatedAt()
