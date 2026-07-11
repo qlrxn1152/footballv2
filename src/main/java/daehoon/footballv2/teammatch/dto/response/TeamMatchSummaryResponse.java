@@ -24,6 +24,8 @@ public class TeamMatchSummaryResponse {
     private TeamMatchStatus status;
     private LocalDateTime createdAt;
 
+    // private LocalDateTime matchedAt; 나중에는, matchedAt 을 만들어서, 매치가 언제인지도 확인할수있게 ..
+
     // PENDING
     public TeamMatchSummaryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating, TeamMatchStatus status, LocalDateTime createdAt) {
         this.teamMatchId = teamMatchId;

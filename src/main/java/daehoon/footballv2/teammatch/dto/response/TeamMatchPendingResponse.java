@@ -27,4 +27,5 @@ public class TeamMatchPendingResponse {
         this.status = status;
         this.createdAt = createdAt;
     }
+
 }
