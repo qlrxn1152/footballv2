@@ -443,7 +443,6 @@ class TeamMatchServiceImplTest {
 
         // then
         assertThat(response).hasSize(0);
-
     }
 
 

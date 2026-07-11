@@ -84,17 +84,32 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
     @Override
-    public List<TeamMatchSummaryResponse> findTeamMatches() {
+    public List<TeamMatchSummaryResponse> findTeamMatches() { // 전체조회 ..
         return teamMatchRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(teamMatch -> new TeamMatchSummaryResponse(
-                        teamMatch.getId(),
-                        teamMatch.getHomeTeam().getId(),
-                        teamMatch.getHomeTeam().getTeamName(),
-                        teamMatch.getHomeTeam().getTeamRating(),
-                        teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
-                ))
+                .map(teamMatch -> {
+                    if (teamMatch.getAwayTeam().getId() == null) {
+                        return new TeamMatchSummaryResponse(
+                                teamMatch.getId(),
+                                teamMatch.getHomeTeam().getId(),
+                                teamMatch.getHomeTeam().getTeamName(),
+                                teamMatch.getHomeTeam().getTeamRating(),
+                                teamMatch.getStatus(),
+                                teamMatch.getCreatedAt());
+                    }
+
+                    return new TeamMatchSummaryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getHomeTeam().getTeamRating(),
+                            teamMatch.getAwayTeam().getId(),
+                            teamMatch.getAwayTeam().getTeamName(),
+                            teamMatch.getAwayTeam().getTeamRating(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt());
+
+                })
                 .toList();
     }
 
