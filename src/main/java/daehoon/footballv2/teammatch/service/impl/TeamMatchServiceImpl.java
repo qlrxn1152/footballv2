@@ -88,7 +88,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         return teamMatchRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(teamMatch -> {
-                    if (teamMatch.getAwayTeam().getId() == null) {
+                    if (teamMatch.getAwayTeam() == null) {
                         return new TeamMatchSummaryResponse(
                                 teamMatch.getId(),
                                 teamMatch.getHomeTeam().getId(),
