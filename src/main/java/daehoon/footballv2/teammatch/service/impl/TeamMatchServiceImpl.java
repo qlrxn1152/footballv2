@@ -5,6 +5,7 @@ import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
 import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -51,5 +54,21 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 teamMatch.getHomeTeam().getTeamRating(),
                 teamMatch.getStatus()
         );
+    }
+
+    @Override
+    public List<TeamMatchPendingResponse> findPendingTeamMatches() {
+        return teamMatchRepository.findAllByStatusOrderByCreatedAtDesc(TeamMatchStatus.PENDING)
+                .stream()
+                .map(teamMatch -> new TeamMatchPendingResponse(
+                        teamMatch.getId(),
+                        teamMatch.getHomeTeam().getId(),
+                        teamMatch.getHomeTeam().getTeamName(),
+                        teamMatch.getHomeTeam().getTeamRating(),
+                        teamMatch.getStatus(),
+                        teamMatch.getCreatedAt()
+                ))
+                .toList();
+
     }
 }

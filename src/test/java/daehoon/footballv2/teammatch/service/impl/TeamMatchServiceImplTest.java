@@ -14,6 +14,7 @@ import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchPendingResponse;
 import daehoon.footballv2.teammatch.exception.exceptions.DuplicateTeamMatchException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
@@ -24,6 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -148,6 +152,86 @@ class TeamMatchServiceImplTest {
                 .isInstanceOf(DuplicateTeamMatchException.class)
                 .hasMessage("이미 진행중인 매치가 존재합니다.");
     }
+
+
+    @Test
+    @DisplayName(value = "PENDING 인 매치들 조회")
+    void findPendingMatches() throws Exception {
+        // given
+        SignupResponse member = authService.signup("memberA", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(team.getTeamId(), member.getMemberId());
+
+        // when
+        List<TeamMatchPendingResponse> response = teamMatchService.findPendingTeamMatches();
+
+        // then
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getTeamMatchId()).isEqualTo(teamMatch.getTeamMatchId());
+        assertThat(response.get(0).getHomeTeamId()).isEqualTo(teamMatch.getHomeTeamId());
+        assertThat(response.get(0).getHomeTeamName()).isEqualTo("teamA");
+        assertThat(response.get(0).getStatus()).isEqualTo(TeamMatchStatus.PENDING);
+        assertThat(response.get(0).getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName(value = "MATCHED 매치는 조회안됨")
+    void findPendingMatches_noContainStatusIsMatched() throws Exception {
+        // given
+        SignupResponse member = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+        Team bTeam = teamRepository.findById(team.getTeamId()).get();
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(team.getTeamId(), member.getMemberId());
+        TeamMatch aa = teamMatchRepository.findById(teamMatch.getTeamMatchId()).get();
+
+        aa.matchedTheMatch(bTeam);
+
+        // when
+        List<TeamMatchPendingResponse> response = teamMatchService.findPendingTeamMatches();
+
+        // then
+        assertThat(response).hasSize(0);
+    }
+
+    @Test
+    @DisplayName(value = "매치가 존재하지 않으면, 빈 리스트")
+    void findPendingMatches_notExistMatch() throws Exception {
+        // when
+        List<TeamMatchPendingResponse> response = teamMatchService.findPendingTeamMatches();
+
+        // then
+        assertThat(response).hasSize(0);
+    }
+
+    @Test
+    @DisplayName(value = "등록순으로 정렬( 최신순으로 조회 )")
+    void findPendingMatches_orderByCreatedAtDesc() throws Exception {
+        // given
+        SignupResponse member = authService.signup("memberA", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(team.getTeamId(), member.getMemberId());
+        TeamMatchCreateResponse teamMatchB = teamMatchService.createTeamMatch(teamB.getTeamId(), memberB.getMemberId());
+
+        // when
+        List<TeamMatchPendingResponse> response = teamMatchService.findPendingTeamMatches();
+
+        // then
+        assertThat(response).hasSize(2);
+        assertThat(response.get(0).getTeamMatchId()).isEqualTo(teamMatchB.getTeamMatchId());
+        assertThat(response.get(1).getTeamMatchId()).isEqualTo(teamMatch.getTeamMatchId());
+    }
+
+
+
+
 
 
 
