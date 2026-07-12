@@ -130,7 +130,7 @@ public class TeamController {
     }
 
     @GetMapping("/api/teams/{teamId}/matches")
-    public ResponseEntity<List<TeamMatchHistoryResponse>> teamMatches(@PathVariable Long teamId, @RequestParam(name = "status", required = false) TeamMatchStatus status) {
+    public ResponseEntity<List<TeamMatchHistoryResponse>> teamMatches(@PathVariable Long teamId, @RequestParam TeamMatchStatus status) {
         // 해당팀이 참여한 매치들을 조회할 수 있음 -> 전체공개. // 해당팀이 참여한 매치들 -> 매칭중, 매칭됨, 경기종료 .. 나눠서?
 
         List<TeamMatchHistoryResponse> response = teamMatchService.findTeamMatchHistory(teamId, status);

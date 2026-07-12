@@ -136,35 +136,12 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
 
 
-    // ====== 리팩토링 . . . ==========
     @Override
     @Transactional(readOnly = true)
-    public List<TeamMatchSummaryResponse> findTeamMatches() { // 모든팀들의 매치 조회 -> 매치탭에 들어가면 나오는 ...
+    public List<TeamMatchSummaryResponse> findTeamMatches() {
         return teamMatchRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(teamMatch -> {
-                    if (teamMatch.getAwayTeam() == null) {
-                        return new TeamMatchSummaryResponse(
-                                teamMatch.getId(),
-                                teamMatch.getHomeTeam().getId(),
-                                teamMatch.getHomeTeam().getTeamName(),
-                                teamMatch.getHomeTeam().getTeamRating(),
-                                teamMatch.getStatus(),
-                                teamMatch.getCreatedAt());
-                    }
-
-                    return new TeamMatchSummaryResponse(
-                            teamMatch.getId(),
-                            teamMatch.getHomeTeam().getId(),
-                            teamMatch.getHomeTeam().getTeamName(),
-                            teamMatch.getHomeTeam().getTeamRating(),
-                            teamMatch.getAwayTeam().getId(),
-                            teamMatch.getAwayTeam().getTeamName(),
-                            teamMatch.getAwayTeam().getTeamRating(),
-                            teamMatch.getStatus(),
-                            teamMatch.getCreatedAt());
-
-                })
+                .map(this::toSummaryResponse)
                 .toList();
     }
 
@@ -189,11 +166,12 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         }
 
         // COMPLETED -> 결과 확인가능
-        return toCompletdSummaryResponse(status);
+        return toCompletedSummaryResponse(status);
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamMatchHistoryResponse> findTeamMatchHistory(Long teamId, TeamMatchStatus status) {
 
         List<TeamMatchHistoryResponse> historyMatches = new ArrayList<>();
@@ -436,6 +414,53 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getCreatedAt()
                 ))
                 .toList();
+    }
+
+
+    private TeamMatchSummaryResponse toSummaryResponse(TeamMatch teamMatch) {
+        if (teamMatch.getStatus() == TeamMatchStatus.PENDING) {
+            return new TeamMatchSummaryResponse(
+                    teamMatch.getId(),
+                    teamMatch.getHomeTeam().getId(),
+                    teamMatch.getHomeTeam().getTeamName(),
+                    teamMatch.getHomeTeam().getTeamRating(),
+                    teamMatch.getStatus(),
+                    teamMatch.getCreatedAt()
+            );
+        }
+
+        if (teamMatch.getStatus() == TeamMatchStatus.MATCHED) {
+            return new TeamMatchSummaryResponse(
+                    teamMatch.getId(),
+                    teamMatch.getHomeTeam().getId(),
+                    teamMatch.getHomeTeam().getTeamName(),
+                    teamMatch.getHomeTeam().getTeamRating(),
+                    teamMatch.getAwayTeam().getId(),
+                    teamMatch.getAwayTeam().getTeamName(),
+                    teamMatch.getAwayTeam().getTeamRating(),
+                    teamMatch.getStatus(),
+                    teamMatch.getCreatedAt()
+            );
+        }
+
+        TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
+                .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+
+        return new TeamMatchSummaryResponse(
+                teamMatch.getId(),
+                teamMatch.getHomeTeam().getId(),
+                teamMatch.getHomeTeam().getTeamName(),
+                teamMatch.getHomeTeam().getTeamRating(),
+                matchResult.getHomeScore(),
+                teamMatch.getAwayTeam().getId(),
+                teamMatch.getAwayTeam().getTeamName(),
+                teamMatch.getAwayTeam().getTeamRating(),
+                matchResult.getAwayScore(),
+                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
+                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
+                teamMatch.getStatus(),
+                teamMatch.getCreatedAt()
+        );
     }
 
 
