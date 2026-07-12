@@ -3,6 +3,7 @@ package daehoon.footballv2.teammatch.controller;
 import daehoon.footballv2.security.jwt.LoginMember;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchCreateRequest;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchResultCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
@@ -29,8 +30,8 @@ public class TeamMatchController {
 
     // 매치생성
     @PostMapping("/api/teams/{teamId}/matches")
-    public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId) {
-        TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId);
+    public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId, @Valid @RequestBody TeamMatchCreateRequest request) {
+        TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId, request.getPlayedAt());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

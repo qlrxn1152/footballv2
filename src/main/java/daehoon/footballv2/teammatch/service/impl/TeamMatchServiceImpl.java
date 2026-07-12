@@ -18,6 +18,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
 
     @Override
-    public TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId) {
+    public TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId, LocalDateTime playedAt) {
         // 매치 생성버튼을 누름 -> 필요한 검증들 진행 ...
         teamValidator.validateTeamExists(teamId); // 팀이있는지
         teamValidator.validateMemberExists(memberId); // 멤버가있는지
@@ -49,7 +50,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         teamMatchValidator.validateNoActiveMatch(teamId);
 
         // 매치를 생성 -> 매치를 저장 ( awayTeam = null ) 홈팀에대한 정보만 존재.
-        TeamMatch teamMatch = teamMatchRepository.save(new TeamMatch(teamMember.getTeam()));
+        TeamMatch teamMatch = teamMatchRepository.save(new TeamMatch(teamMember.getTeam(), playedAt));
 
         // dto 로 변경해서, 응답 dto 를 반환
         return new TeamMatchCreateResponse(
@@ -57,7 +58,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 teamMatch.getHomeTeam().getId(),
                 teamMatch.getHomeTeam().getTeamName(),
                 teamMatch.getHomeTeam().getTeamRating(),
-                teamMatch.getStatus()
+                teamMatch.getStatus(),
+                playedAt
         );
     }
 
@@ -241,7 +243,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                             matchResult.getHomeScore(),
                             matchResult.getAwayScore(),
                             matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
-                            matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName()
+                            matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
+                            teamMatch.getPlayedAt()
                             );
                 })
                 .toList();
@@ -263,7 +266,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                                 matchResult.getHomeScore(),
                                 matchResult.getAwayScore(),
                                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
-                                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName()
+                                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
+                                teamMatch.getPlayedAt()
                         );
                 })
                 .toList();
@@ -293,7 +297,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getId(),
                         teamMatch.getAwayTeam().getTeamName(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
 
@@ -305,7 +310,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getId(),
                         teamMatch.getAwayTeam().getTeamName(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
 
@@ -333,7 +339,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getId(),
                         teamMatch.getHomeTeam().getTeamName(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
 
@@ -344,7 +351,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getId(),
                         teamMatch.getHomeTeam().getTeamName(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
 
@@ -379,7 +387,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                             matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
 
                             teamMatch.getStatus(),
-                            teamMatch.getCreatedAt()
+                            teamMatch.getCreatedAt(),
+                            teamMatch.getPlayedAt()
                     );
                 })
                 .toList();
@@ -397,7 +406,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getTeamName(),
                         teamMatch.getAwayTeam().getTeamRating(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
     }
@@ -411,7 +421,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getTeamName(),
                         teamMatch.getHomeTeam().getTeamRating(),
                         teamMatch.getStatus(),
-                        teamMatch.getCreatedAt()
+                        teamMatch.getCreatedAt(),
+                        teamMatch.getPlayedAt()
                 ))
                 .toList();
     }
@@ -425,7 +436,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getHomeTeam().getTeamName(),
                     teamMatch.getHomeTeam().getTeamRating(),
                     teamMatch.getStatus(),
-                    teamMatch.getCreatedAt()
+                    teamMatch.getCreatedAt(),
+                    teamMatch.getPlayedAt()
             );
         }
 
@@ -439,7 +451,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getAwayTeam().getTeamName(),
                     teamMatch.getAwayTeam().getTeamRating(),
                     teamMatch.getStatus(),
-                    teamMatch.getCreatedAt()
+                    teamMatch.getCreatedAt(),
+                    teamMatch.getPlayedAt()
             );
         }
 
@@ -459,7 +472,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
                 teamMatch.getStatus(),
-                teamMatch.getCreatedAt()
+                teamMatch.getCreatedAt(),
+                teamMatch.getPlayedAt()
         );
     }
 

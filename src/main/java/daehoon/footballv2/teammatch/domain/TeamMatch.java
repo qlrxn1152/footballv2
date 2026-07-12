@@ -28,16 +28,16 @@ public class TeamMatch {
     @Column(name = "team_match_status", nullable = false)
     private TeamMatchStatus status; // PENDING, MATCHED, COMPLETED
 
-    /*
-    @Column(name = "matched_at", nullable = false)
-    private LocalDateTime matchedAt; // 매치날짜, 시간이 언제인지. -> 요청을 등록할때, 날짜를 선택할수있게해서, 매치날짜를 선택할수있게 정해줘야함 ...
-     */
+    @Column(name = "played_at", nullable = false)
+    private LocalDateTime playedAt; // 매치날짜
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt; // 매치요청 생성날짜가 언제인지
 
-    public TeamMatch(Team homeTeam) {
+    public TeamMatch(Team homeTeam, LocalDateTime playedAt) {
         this.homeTeam = homeTeam;
+        this.playedAt = playedAt; // 매치 진행날짜
+
         this.awayTeam = null;
         this.status = TeamMatchStatus.PENDING;
         this.createdAt = LocalDateTime.now();
