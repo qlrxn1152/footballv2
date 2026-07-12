@@ -25,20 +25,14 @@ public class TeamMatchValidator {
      */
     public void validateNoActiveMatch(Long teamId) {
 
-        if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)) {
+        if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)
+                || teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)) {
             throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
         }
 
-        else if (teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)) {
-            throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
-        }
-
-        else if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
+        if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)
+                || teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
             throw new DuplicateTeamMatchException("이미 진행중인 매치가 존재합니다.");
-        }
-
-        else if (teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
-            throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
         }
 
     }

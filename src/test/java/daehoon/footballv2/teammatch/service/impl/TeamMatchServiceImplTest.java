@@ -148,6 +148,10 @@ class TeamMatchServiceImplTest {
         assertThatThrownBy(() -> teamMatchService.createTeamMatch(team.getTeamId(), member.getMemberId(),  LocalDateTime.of(2026, 1,1,1,1)))
                 .isInstanceOf(DuplicateTeamMatchException.class)
                 .hasMessage("이미 진행중인 매치가 존재합니다.");
+
+        assertThatThrownBy(() -> teamMatchService.createTeamMatch(team2.getTeamId(), member2.getMemberId(), LocalDateTime.of(2026, 1, 1, 1, 1)))
+                .isInstanceOf(DuplicateTeamMatchException.class)
+                .hasMessage("이미 진행중인 매치가 존재합니다.");
     }
 
 
