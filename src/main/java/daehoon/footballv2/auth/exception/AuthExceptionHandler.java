@@ -29,9 +29,14 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<AuthErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        log.warn("Validation error: {}", ex.getMessage());
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("요청 값을 확인하세요.");
+        log.warn("Validation error: {}", message);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthErrorResponse("VALIDATION_ERROR", "아이디 또는 비밀번호 길이를 확인하세요."));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new AuthErrorResponse("VALIDATION_ERROR", message));
     }
 
 

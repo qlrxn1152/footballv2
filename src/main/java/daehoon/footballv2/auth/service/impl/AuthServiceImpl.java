@@ -9,13 +9,11 @@ import daehoon.footballv2.member.repository.MemberRepository;
 import daehoon.footballv2.auth.service.AuthService;
 import daehoon.footballv2.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class AuthServiceImpl implements AuthService {
@@ -45,8 +43,6 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(String username, String password) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidLoginException("아이디 또는 비밀번호가 일치하지 않습니다."));
-
-        log.info("password = {}", member.getPassword());
 
         if (!encoder.matches(password, member.getPassword())) {
             throw new InvalidLoginException("아이디 또는 비밀번호가 일치하지 않습니다.");
