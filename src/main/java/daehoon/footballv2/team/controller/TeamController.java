@@ -18,7 +18,6 @@ import daehoon.footballv2.team.dto.response.teamname.TeamNameUpdateResponse;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchHistoryResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
