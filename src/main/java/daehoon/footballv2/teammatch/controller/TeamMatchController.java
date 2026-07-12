@@ -1,5 +1,6 @@
 package daehoon.footballv2.teammatch.controller;
 
+import daehoon.footballv2.security.jwt.LoginMember;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchResultCreateRequest;
@@ -8,6 +9,7 @@ import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,17 +29,17 @@ public class TeamMatchController {
 
     // 매치생성
     @PostMapping("/api/teams/{teamId}/matches")
-    public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long memberId) {
+    public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId) {
         TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/api/team-matches/{teamMatchId}/accept")
-    public ResponseEntity<TeamMatchAcceptResponse> acceptTeamMatch(@PathVariable Long teamMatchId, @RequestHeader("X-MEMBER-ID") Long awayLeaderMemberId) {
-        // awayLeaderMemberId -> 어웨이팀 팀장, teamMatchId -> 어떤매치에 신청
+    public ResponseEntity<TeamMatchAcceptResponse> acceptTeamMatch(@PathVariable Long teamMatchId, @Parameter(hidden = true) @LoginMember Long memberId) {
+        // memberId -> 어웨이팀 팀장, teamMatchId -> 어떤매치에 신청
 
-        TeamMatchAcceptResponse response = teamMatchService.acceptTeamMatch(teamMatchId, awayLeaderMemberId);
+        TeamMatchAcceptResponse response = teamMatchService.acceptTeamMatch(teamMatchId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -61,7 +63,7 @@ public class TeamMatchController {
     }
 
     @PostMapping("/api/team-matches/{teamMatchId}/result") // 매치 결과 입력
-    public ResponseEntity<TeamMatchResultResponse> matchResult(@PathVariable Long teamMatchId, @RequestHeader("X-MEMBER-ID") Long memberId, @Valid @RequestBody TeamMatchResultCreateRequest request) {
+    public ResponseEntity<TeamMatchResultResponse> matchResult(@PathVariable Long teamMatchId, @Parameter(hidden = true) @LoginMember Long memberId, @Valid @RequestBody TeamMatchResultCreateRequest request) {
         // memberId -> 홈팀의 팀장이여야함.
         TeamMatchResultResponse response = teamMatchService.registerMatchResult(teamMatchId, memberId, request.getHomeScore(), request.getAwayScore());
 

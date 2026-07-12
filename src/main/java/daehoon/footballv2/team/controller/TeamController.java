@@ -1,5 +1,6 @@
 package daehoon.footballv2.team.controller;
 
+import daehoon.footballv2.security.jwt.LoginMember;
 import daehoon.footballv2.team.domain.TeamJoinRequestStatus;
 import daehoon.footballv2.team.dto.request.teamcreate.TeamCreateRequest;
 import daehoon.footballv2.team.dto.request.teamleader.TeamLeaderTransferRequest;
@@ -19,6 +20,7 @@ import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchHistoryResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +40,14 @@ public class TeamController {
 
     // 팀 생성
     @PostMapping("/api/teams")
-    public ResponseEntity<TeamCreateResponse> createTeam(@Valid @RequestBody TeamCreateRequest teamCreateRequest, @RequestHeader("X-MEMBER-ID") Long memberId) {
+    public ResponseEntity<TeamCreateResponse> createTeam(@Valid @RequestBody TeamCreateRequest teamCreateRequest, @Parameter(hidden = true) @LoginMember Long memberId) {
         TeamCreateResponse response = teamService.createTeam(teamCreateRequest.getTeamName(), memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/api/teams/{teamId}/join-requests")
-    public ResponseEntity<TeamJoinRequestCreateResponse> joinRequestTeam(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long memberId) {
+    public ResponseEntity<TeamJoinRequestCreateResponse> joinRequestTeam(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId) {
         TeamJoinRequestCreateResponse response = teamService.joinRequest(teamId, memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -55,8 +57,8 @@ public class TeamController {
     public ResponseEntity<TeamJoinRequestDecisionResponse> acceptRequest(
             @PathVariable Long teamId,
             @PathVariable Long joinRequestId,
-            @RequestHeader("X-MEMBER-ID") Long loginMemberId) {
-        TeamJoinRequestDecisionResponse response = teamService.acceptRequest(joinRequestId, teamId, loginMemberId);
+            @Parameter(hidden = true) @LoginMember Long memberId) {
+        TeamJoinRequestDecisionResponse response = teamService.acceptRequest(joinRequestId, teamId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -65,8 +67,8 @@ public class TeamController {
     public ResponseEntity<TeamJoinRequestDecisionResponse> rejectRequest(
             @PathVariable Long teamId,
             @PathVariable Long joinRequestId,
-            @RequestHeader("X-MEMBER-ID") Long loginMemberId) {
-        TeamJoinRequestDecisionResponse response = teamService.rejectRequest(joinRequestId, teamId, loginMemberId);
+            @Parameter(hidden = true) @LoginMember Long memberId) {
+        TeamJoinRequestDecisionResponse response = teamService.rejectRequest(joinRequestId, teamId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -74,10 +76,10 @@ public class TeamController {
     @GetMapping("/api/teams/{teamId}/join-requests")
     public ResponseEntity<List<TeamJoinRequestSummaryResponse>> requests(
             @PathVariable Long teamId,
-            @RequestHeader("X-MEMBER-ID") Long leaderMemberId,
+            @Parameter(hidden = true) @LoginMember Long memberId,
             @RequestParam TeamJoinRequestStatus status) {
 
-        List<TeamJoinRequestSummaryResponse> response = teamService.findJoinRequests(teamId, leaderMemberId, status); // status 에 따라서 요청
+        List<TeamJoinRequestSummaryResponse> response = teamService.findJoinRequests(teamId, memberId, status); // status 에 따라서 요청
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -113,18 +115,18 @@ public class TeamController {
     }
 
     @PatchMapping("/api/teams/{teamId}/name")
-    public ResponseEntity<TeamNameUpdateResponse> changeTeamName(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId, @Valid @RequestBody TeamNameUpdateRequest request) {
-        // leaderMemberId -> loginMemberId
-        TeamNameUpdateResponse response = teamService.updateTeamName(teamId, leaderMemberId, request.getTeamName());
+    public ResponseEntity<TeamNameUpdateResponse> changeTeamName(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId, @Valid @RequestBody TeamNameUpdateRequest request) {
+        // memberId -> loginMemberId
+        TeamNameUpdateResponse response = teamService.updateTeamName(teamId, memberId, request.getTeamName());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/api/teams/{teamId}")
-    public ResponseEntity<TeamDisbandResponse> disbandTeam(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long leaderMemberId) {
-        // leaderMemberId -> loginMemberId
+    public ResponseEntity<TeamDisbandResponse> disbandTeam(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId) {
+        // memberId -> loginMemberId
 
-        TeamDisbandResponse response = teamService.disbandTeam(teamId, leaderMemberId);
+        TeamDisbandResponse response = teamService.disbandTeam(teamId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
