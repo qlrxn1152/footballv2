@@ -39,4 +39,16 @@ public class Team {
         this.teamName = newTeamName;
     }
 
+    public void win() {
+        this.teamRating += 30;
+    }
+
+    public void draw() {
+        this.teamRating += 10;
+    }
+
+    public void lose() {
+        this.teamRating -= 30;
+    }
+
 }

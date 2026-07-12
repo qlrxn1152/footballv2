@@ -119,6 +119,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
 
+    // 매치 결과 등록 ...
     @Override
     public TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore) {
         TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);
@@ -142,17 +143,19 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         // 팀장까지 맞네 -> 결과입력 ㄱㄱ
         TeamMatchResult matchResult = teamMatchResultRepository.save(new TeamMatchResult(teamMatch, homeScore, awayScore));
 
-        // 매치상태 변경
-        teamMatch.completedMatch();
+        // 매치상태 변경 , 점수 반영
+        teamMatch.completedMatch(matchResult.getHomeScore(), matchResult.getAwayScore());
 
         return new TeamMatchResultResponse(
                 teamMatch.getId(),
                 teamMatch.getHomeTeam().getId(),
                 teamMatch.getHomeTeam().getTeamName(),
                 matchResult.getHomeScore(),
+
                 teamMatch.getAwayTeam().getId(),
                 teamMatch.getAwayTeam().getTeamName(),
                 matchResult.getAwayScore(),
+
                 teamMatch.getStatus()
         );
 

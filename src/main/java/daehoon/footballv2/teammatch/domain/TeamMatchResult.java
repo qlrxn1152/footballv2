@@ -38,10 +38,12 @@ public class TeamMatchResult {
         this.homeScore = homeScore;
         this.awayScore = awayScore;
 
+        // 무승부시, 양팀 점수 + 10
         if (homeScore.equals(awayScore)) {
             this.winnerTeam = null; // null 이 맞을까? // Optional?
         }
 
+        // 승리팀 점수 + 30 , 패배팀 점수 - 30
         if (homeScore > awayScore) {
             this.winnerTeam = teamMatch.getHomeTeam();
         }

@@ -48,8 +48,25 @@ public class TeamMatch {
         this.status = TeamMatchStatus.MATCHED;
     }
 
-    public void completedMatch() {
+    public void completedMatch(Integer homeScore, Integer awayScore) {
         this.status = TeamMatchStatus.COMPLETED;
+        // 점수 반영 ...
+
+        if (homeScore.equals(awayScore)) {
+            this.homeTeam.draw();
+            this.awayTeam.draw();
+        }
+
+        if (homeScore > awayScore) {
+            this.homeTeam.win();
+            this.awayTeam.lose();
+        }
+
+        if (homeScore < awayScore) {
+            this.homeTeam.lose();
+            this.awayTeam.win();
+        }
+
     }
 
 }

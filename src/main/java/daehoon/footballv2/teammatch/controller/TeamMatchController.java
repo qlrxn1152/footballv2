@@ -60,10 +60,9 @@ public class TeamMatchController {
         return ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches(status));
     }
 
-    @PostMapping("/api/team-matches/{teamMatchId}/result")
+    @PostMapping("/api/team-matches/{teamMatchId}/result") // 매치 결과 입력
     public ResponseEntity<TeamMatchResultResponse> matchResult(@PathVariable Long teamMatchId, @RequestHeader("X-MEMBER-ID") Long memberId, @Valid @RequestBody TeamMatchResultCreateRequest request) {
         // memberId -> 홈팀의 팀장이여야함.
-
         TeamMatchResultResponse response = teamMatchService.registerMatchResult(teamMatchId, memberId, request.getHomeScore(), request.getAwayScore());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
