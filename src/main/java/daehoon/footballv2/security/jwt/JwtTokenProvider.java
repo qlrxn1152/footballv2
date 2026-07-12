@@ -37,4 +37,36 @@ public class JwtTokenProvider {
     public long getAccessTokenExpirationSeconds() {
         return accessTokenExpiration / 1000;
     }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Long getMemberId(String token) {
+        String subject = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+
+        return Long.valueOf(subject);
+    }
+
+    public String getUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("username", String.class);
+    }
 }
