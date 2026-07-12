@@ -5,10 +5,7 @@ import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchCreateRequest;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchResultCreateRequest;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
+import daehoon.footballv2.teammatch.dto.response.*;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -57,7 +54,7 @@ public class TeamMatchController {
     public ResponseEntity<List<TeamMatchSummaryResponse>> findTeamMatches(@RequestParam(name = "status", required = false) TeamMatchStatus status) {
 
         if (status == null) {
-            return  ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches());
+            return ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches());
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(teamMatchService.findTeamMatches(status));
@@ -71,5 +68,11 @@ public class TeamMatchController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/api/team-matches/{teamMatchId}")
+    public ResponseEntity<TeamMatchDetailResponse> teamMatchDetail(@PathVariable Long teamMatchId) {
 
+        TeamMatchDetailResponse response = teamMatchService.findTeamMatchDetail(teamMatchId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

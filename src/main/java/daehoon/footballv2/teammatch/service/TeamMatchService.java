@@ -20,6 +20,8 @@ public interface TeamMatchService {
 
     List<TeamMatchHistoryResponse> findTeamMatchHistory(Long teamId, TeamMatchStatus status);
 
+    TeamMatchDetailResponse findTeamMatchDetail(Long teamMatchId);
+
 
 
 }

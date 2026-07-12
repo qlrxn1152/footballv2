@@ -196,8 +196,74 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         return historyMatches; // 매치가 없는경우 -> 빈 리스트 반환
     }
 
+    @Override
+    public TeamMatchDetailResponse findTeamMatchDetail(Long teamMatchId) {
+        TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);// 팀 매치 조회
+        TeamMatchStatus status = teamMatch.getStatus();
+
+        TeamMatchDetailResponse response;
 
 
+        if ( status == TeamMatchStatus.PENDING ) {
+            teamMatchValidator.validatePendingStatus(teamMatch);
+
+            response = new TeamMatchDetailResponse(
+                    teamMatch.getId(),
+                    teamMatch.getHomeTeam().getId(),
+                    teamMatch.getHomeTeam().getTeamName(),
+                    teamMatch.getHomeTeam().getTeamRating(),
+                    teamMatch.getStatus(),
+                    teamMatch.getCreatedAt(),
+                    teamMatch.getPlayedAt()
+            );
+        }
+
+        else if ( status == TeamMatchStatus.MATCHED ) {
+
+            teamMatchValidator.validateMatchedStatus(teamMatch);
+
+            response = new TeamMatchDetailResponse(
+                    teamMatch.getId(),
+                    teamMatch.getHomeTeam().getId(),
+                    teamMatch.getHomeTeam().getTeamName(),
+                    teamMatch.getHomeTeam().getTeamRating(),
+                    teamMatch.getAwayTeam().getId(),
+                    teamMatch.getAwayTeam().getTeamName(),
+                    teamMatch.getAwayTeam().getTeamRating(),
+                    teamMatch.getStatus(),
+                    teamMatch.getCreatedAt(),
+                    teamMatch.getPlayedAt()
+            );
+        }
+
+
+        else {
+            TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatchId)
+                    .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+
+            teamMatchValidator.validateCompletedStats(teamMatch);
+
+            response = new TeamMatchDetailResponse(
+                    teamMatch.getId(),
+                    teamMatch.getHomeTeam().getId(),
+                    teamMatch.getHomeTeam().getTeamName(),
+                    teamMatch.getHomeTeam().getTeamRating(),
+                    teamMatch.getAwayTeam().getId(),
+                    teamMatch.getAwayTeam().getTeamName(),
+                    teamMatch.getAwayTeam().getTeamRating(),
+                    teamMatch.getStatus(),
+                    teamMatch.getCreatedAt(),
+                    teamMatch.getPlayedAt(),
+                    matchResult.getHomeScore(),
+                    matchResult.getAwayScore(),
+                    matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
+                    matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName()
+            );
+        }
+
+        return response;
+
+    }
 
 
 

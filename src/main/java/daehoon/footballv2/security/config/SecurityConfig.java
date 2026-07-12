@@ -33,6 +33,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/team-matches/{teamMatchId}").permitAll() // 특정 팀 매치
+                        .requestMatchers(HttpMethod.GET,"/api/team-matches").permitAll() // 모든 팀 매치들 조회
+                        .requestMatchers(HttpMethod.GET, "/api/team-matches/pending").permitAll() // 모든 팀 매치에서 PENDING 인 매치들
 
                         .anyRequest().authenticated()
                 )
