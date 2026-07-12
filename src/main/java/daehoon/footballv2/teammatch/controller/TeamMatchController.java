@@ -25,6 +25,7 @@ public class TeamMatchController {
     private final TeamMatchService teamMatchService;
     private final TeamService teamService;
 
+    // 매치생성
     @PostMapping("/api/teams/{teamId}/matches")
     public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long memberId) {
         TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId);
@@ -66,6 +67,7 @@ public class TeamMatchController {
         TeamMatchResultResponse response = teamMatchService.registerMatchResult(teamMatchId, memberId, request.getHomeScore(), request.getAwayScore());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
-
     }
+
+
 }

@@ -15,6 +15,10 @@ import daehoon.footballv2.team.dto.response.teamlist.TeamSummaryResponse;
 import daehoon.footballv2.team.dto.response.teammember.TeamMemberSummaryResponse;
 import daehoon.footballv2.team.dto.response.teamname.TeamNameUpdateResponse;
 import daehoon.footballv2.team.service.TeamService;
+import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchHistoryResponse;
+import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
+import daehoon.footballv2.teammatch.service.TeamMatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final TeamMatchService teamMatchService;
 
     // 팀 생성
     @PostMapping("/api/teams")
@@ -123,4 +128,14 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/api/teams/{teamId}/matches")
+    public ResponseEntity<List<TeamMatchHistoryResponse>> teamMatches(@PathVariable Long teamId, @RequestParam(name = "status", required = false) TeamMatchStatus status) {
+        // 해당팀이 참여한 매치들을 조회할 수 있음 -> 전체공개. // 해당팀이 참여한 매치들 -> 매칭중, 매칭됨, 경기종료 .. 나눠서?
+
+        List<TeamMatchHistoryResponse> response = teamMatchService.findTeamMatchHistory(teamId, status);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

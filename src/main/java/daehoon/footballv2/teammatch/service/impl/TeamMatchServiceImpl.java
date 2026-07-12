@@ -6,10 +6,7 @@ import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchResult;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchResultResponse;
-import daehoon.footballv2.teammatch.dto.response.TeamMatchSummaryResponse;
+import daehoon.footballv2.teammatch.dto.response.*;
 import daehoon.footballv2.teammatch.exception.exceptions.NotFoundTeamMatchResultException;
 import daehoon.footballv2.teammatch.repository.TeamMatchRepository;
 import daehoon.footballv2.teammatch.repository.TeamMatchResultRepository;
@@ -20,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -122,7 +120,46 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    public TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore) {
+        TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);
+        teamValidator.validateMemberExists(homeLeaderMemberId);
+
+        // 이미 해당매치에 결과가 있으면?
+        teamMatchValidator.validateResultNotExists(teamMatch);
+
+        // 매치가 MATCHED 인 상태인게 맞는지
+        teamMatchValidator.validateMatchedStatus(teamMatch);
+
+        TeamMember teamMember = teamValidator.validateJoinedTeam(homeLeaderMemberId); // 멤버가 팀에 가입되어져 있나 ?
+
+        teamValidator.validateTeamLeader(teamMember); // 너 팀장임?
+
+        teamMatchValidator.validateParticipantTeam(teamMatch, teamMember.getTeam().getId()); // 결과등록한 멤버 팀이랑, teamMatch 에 홈팀이랑 같음 ?
+
+        // 점수검증
+        teamMatchValidator.validateScore(homeScore, awayScore);
+
+        // 팀장까지 맞네 -> 결과입력 ㄱㄱ
+        TeamMatchResult matchResult = teamMatchResultRepository.save(new TeamMatchResult(teamMatch, homeScore, awayScore));
+
+        // 매치상태 변경
+        teamMatch.completedMatch();
+
+        return new TeamMatchResultResponse(
+                teamMatch.getId(),
+                teamMatch.getHomeTeam().getId(),
+                teamMatch.getHomeTeam().getTeamName(),
+                matchResult.getHomeScore(),
+                teamMatch.getAwayTeam().getId(),
+                teamMatch.getAwayTeam().getTeamName(),
+                matchResult.getAwayScore(),
+                teamMatch.getStatus()
+        );
+
+    }
+
+    @Override
+    @Transactional(readOnly = true) // 전체 ..
     public List<TeamMatchSummaryResponse> findTeamMatches(TeamMatchStatus status) {
 
         // status -> PENDING
@@ -163,7 +200,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 .stream()
                 .map(teamMatch -> {
                     TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
-                                    .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+                            .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
 
 
                     return new TeamMatchSummaryResponse(
@@ -184,50 +221,163 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                             teamMatch.getStatus(),
                             teamMatch.getCreatedAt()
                     );
-                        })
+                })
                 .toList();
-
-
-
     }
 
     @Override
-    public TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore) {
-        TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);
-        teamValidator.validateMemberExists(homeLeaderMemberId);
+    public List<TeamMatchHistoryResponse> findTeamMatchHistory(Long teamId, TeamMatchStatus status) {
 
-        // 이미 해당매치에 결과가 있으면?
-        teamMatchValidator.validateResultNotExists(teamMatch);
+        List<TeamMatchHistoryResponse> historyMatches = new ArrayList<>();
 
-        // 매치가 MATCHED 인 상태인게 맞는지
-        teamMatchValidator.validateMatchedStatus(teamMatch);
+        // teamMatch-> 결과가 있는지를 따진다?
+        teamValidator.validateTeamExists(teamId); // 팀 있는지 조회
 
-        TeamMember teamMember = teamValidator.validateJoinedTeam(homeLeaderMemberId); // 멤버가 팀에 가입되어져 있나 ?
+        //TODO: 전체조회 하는 로직은 나중에 다시 구현 ...!!
 
-        teamValidator.validateTeamLeader(teamMember); // 너 팀장임?
 
-        teamMatchValidator.validateParticipantTeam(teamMatch, teamMember.getTeam().getId()); // 결과등록한 멤버 팀이랑, teamMatch 에 홈팀이랑 같음 ?
+        if (status == TeamMatchStatus.PENDING) { // 상대팀이 안잡힌 해당팀의 매치들
+            List<TeamMatch> homeMatches = teamMatchRepository.findByHomeTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.PENDING);
+            homeMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인 -> 현재 무효화되는 ...
+            homeMatches.forEach(teamMatchValidator::validatePendingStatus); // PENDING 상태들이 맞는지 확인
+            homeMatches.forEach(teamMatchValidator::validateResultNotExists); // RESULT 가 없는지 확인
 
-        // 점수검증
-        teamMatchValidator.validateScore(homeScore, awayScore);
+            List<TeamMatch> awayMatches = teamMatchRepository.findByAwayTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.PENDING);
+            awayMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인
+            awayMatches.forEach(teamMatchValidator::validatePendingStatus); // PENDING 상태들이 맞는지 확인
+            awayMatches.forEach(teamMatchValidator::validateResultNotExists); // RESULT 가 없는지 확인
 
-        // 팀장까지 맞네 -> 결과입력 ㄱㄱ
-        TeamMatchResult matchResult = teamMatchResultRepository.save(new TeamMatchResult(teamMatch, homeScore, awayScore));
+            // 다 통과됐음
+            List<TeamMatchHistoryResponse> homeHistorys = homeMatches.stream()
+                    .map(teamMatch -> new TeamMatchHistoryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
 
-        // 매치상태 변경
-        teamMatch.completedMatch();
 
-        return new TeamMatchResultResponse(
-                teamMatch.getId(),
-                teamMatch.getHomeTeam().getId(),
-                teamMatch.getHomeTeam().getTeamName(),
-                matchResult.getHomeScore(),
-                teamMatch.getAwayTeam().getId(),
-                teamMatch.getAwayTeam().getTeamName(),
-                matchResult.getAwayScore(),
-                teamMatch.getStatus()
-        );
+            List<TeamMatchHistoryResponse> awayHistorys =  awayMatches.stream()
+                    .map(teamMatch -> new TeamMatchHistoryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
 
+            historyMatches.addAll(homeHistorys);
+            historyMatches.addAll(awayHistorys);
+
+            return historyMatches;
+        }
+
+        else if (status == TeamMatchStatus.MATCHED) { // 상대팀이 잡힌 해당팀의 매치들
+            List<TeamMatch> homeMatches = teamMatchRepository.findByHomeTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.MATCHED);
+            homeMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인
+            homeMatches.forEach(teamMatchValidator::validateMatchedStatus); // MATCHED 상태들이 맞는지 확인
+            homeMatches.forEach(teamMatchValidator::validateResultNotExists); // RESULT 가 없는지 확인
+
+            List<TeamMatch> awayMatches = teamMatchRepository.findByAwayTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.MATCHED);
+            awayMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인
+            awayMatches.forEach(teamMatchValidator::validateMatchedStatus); // MATCHED 상태들이 맞는지 확인
+            awayMatches.forEach(teamMatchValidator::validateResultNotExists); // RESULT 가 없는지 확인
+
+            List<TeamMatchHistoryResponse> homeHistorys = homeMatches.stream()
+                    .map(teamMatch -> new TeamMatchHistoryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getAwayTeam().getId(),
+                            teamMatch.getAwayTeam().getTeamName(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
+
+            List<TeamMatchHistoryResponse> awayHistorys = awayMatches.stream()
+                    .map(teamMatch -> new TeamMatchHistoryResponse(
+                            teamMatch.getId(),
+                            teamMatch.getHomeTeam().getId(),
+                            teamMatch.getHomeTeam().getTeamName(),
+                            teamMatch.getAwayTeam().getId(),
+                            teamMatch.getAwayTeam().getTeamName(),
+                            teamMatch.getStatus(),
+                            teamMatch.getCreatedAt()
+                    ))
+                    .toList();
+
+            historyMatches.addAll(homeHistorys);
+            historyMatches.addAll(awayHistorys);
+
+            return historyMatches;
+        }
+
+        else if (status == TeamMatchStatus.COMPLETED) { // 매치가 종료된 해당팀의 매치들
+            List<TeamMatch> homeMatches = teamMatchRepository.findByHomeTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.COMPLETED);
+            homeMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인
+            homeMatches.forEach(teamMatchValidator::validateCompletedStats); // COMPLETED 상태들이 맞는지 확인
+            homeMatches.forEach(teamMatchValidator::validateResultExists);// RESULT 가 있는지 확인
+
+            List<TeamMatch> awayMatches = teamMatchRepository.findByAwayTeamIdAndStatusOrderByCreatedAtDesc(teamId, TeamMatchStatus.COMPLETED);
+            awayMatches.forEach(teamMatch -> teamMatchValidator.validateTeamMatchExists(teamMatch.getId())); // 매치가 존재하는지 확인
+            awayMatches.forEach(teamMatchValidator::validateCompletedStats); // COMPLETED 상태들이 맞는지 확인
+            awayMatches.forEach(teamMatchValidator::validateResultExists);// RESULT 가 있는지 확인
+
+            List<TeamMatchHistoryResponse> homeHistorys = homeMatches.stream()
+                    .map(teamMatch -> {
+
+                        TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
+                                .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+
+                        return new TeamMatchHistoryResponse(
+                                teamMatch.getId(),
+                                teamMatch.getHomeTeam().getId(),
+                                teamMatch.getHomeTeam().getTeamName(),
+                                teamMatch.getAwayTeam().getId(),
+                                teamMatch.getAwayTeam().getTeamName(),
+                                teamMatch.getStatus(),
+                                teamMatch.getCreatedAt(),
+                                matchResult.getHomeScore(),
+                                matchResult.getAwayScore(),
+                                matchResult.getWinnerTeam().getId(),
+                                matchResult.getWinnerTeam().getTeamName()
+                                );
+                    })
+                    .toList();
+
+            List<TeamMatchHistoryResponse> awayHistorys = awayMatches.stream()
+                    .map(teamMatch -> {
+
+                        TeamMatchResult matchResult = teamMatchResultRepository.findByTeamMatchId(teamMatch.getId())
+                                .orElseThrow(() -> new NotFoundTeamMatchResultException("매치 결과 조회 실패"));
+
+                            return new TeamMatchHistoryResponse(
+                                    teamMatch.getId(),
+                                    teamMatch.getHomeTeam().getId(),
+                                    teamMatch.getHomeTeam().getTeamName(),
+                                    teamMatch.getAwayTeam().getId(),
+                                    teamMatch.getAwayTeam().getTeamName(),
+                                    teamMatch.getStatus(),
+                                    teamMatch.getCreatedAt(),
+                                    matchResult.getHomeScore(),
+                                    matchResult.getAwayScore(),
+                                    matchResult.getWinnerTeam().getId(),
+                                    matchResult.getWinnerTeam().getTeamName()
+                            );
+                    })
+                    .toList();
+
+            historyMatches.addAll(homeHistorys);
+            historyMatches.addAll(awayHistorys);
+
+            return historyMatches;
+        }
+
+        return historyMatches; // 매치가 없는경우 -> 빈 리스트 반환
     }
 
 

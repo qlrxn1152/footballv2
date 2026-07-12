@@ -41,7 +41,7 @@ public class TeamMatchValidator {
 
     public void validatePendingStatus(TeamMatch teamMatch) {
         if (teamMatch.getStatus() != TeamMatchStatus.PENDING) {
-            throw new NotPendingTeamMatchException("대기 중인 매치만 수락할 수 있습니다.");
+            throw new NotPendingTeamMatchException("PENDING 상태가 아닙니다.");
         }
     }
 
@@ -63,13 +63,19 @@ public class TeamMatchValidator {
 
     public void validateMatchedStatus(TeamMatch teamMatch) {
         if (teamMatch.getStatus() != TeamMatchStatus.MATCHED) {
-            throw new TeamMatchStatusException("매치결과를 입력하기위해서는, 해당 매치가 MATCHED 상태여야 합니다.");
+            throw new TeamMatchStatusException("MATCHED 상태가 아닙니다.");
         }
     }
 
     public void validateResultNotExists(TeamMatch teamMatch) {
         if (teamMatchResultRepository.existsByTeamMatchId(teamMatch.getId())) {
             throw new AlreadyExistMatchResultException("이미 결과가 입력된 매치입니다.");
+        }
+    }
+
+    public void validateResultExists(TeamMatch teamMatch) {
+        if (!teamMatchResultRepository.existsByTeamMatchId(teamMatch.getId())) {
+            throw new AlreadyExistMatchResultException("매치 결과가 입력되지 않은 매치입니다.");
         }
     }
 
@@ -86,6 +92,12 @@ public class TeamMatchValidator {
     public void validateParticipantTeam(TeamMatch teamMatch, Long requestTeamId) {
         if (!teamMatch.getHomeTeam().getId().equals(requestTeamId)) {
             throw new NotSameTeamException("해당 매치에 참여한 팀이 아닙니다.");
+        }
+    }
+
+    public void validateCompletedStats(TeamMatch teamMatch) {
+        if (teamMatch.getStatus() != TeamMatchStatus.COMPLETED) {
+            throw new TeamMatchStatusException("COMPLETED 상태가 아닙니다.");
         }
     }
 

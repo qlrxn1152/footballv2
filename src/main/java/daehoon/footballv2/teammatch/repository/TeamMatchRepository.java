@@ -17,4 +17,9 @@ public interface TeamMatchRepository extends JpaRepository<TeamMatch, Long> {
 
     List<TeamMatch> findAllByOrderByCreatedAtDesc();
 
+    List<TeamMatch> findByHomeTeamIdAndStatusOrderByCreatedAtDesc(Long homeTeamId, TeamMatchStatus status);
+
+    List<TeamMatch> findByAwayTeamIdAndStatusOrderByCreatedAtDesc(Long awayTeamId, TeamMatchStatus status);
+
+
 }
