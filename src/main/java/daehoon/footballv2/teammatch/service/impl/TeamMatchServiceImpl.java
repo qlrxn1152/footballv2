@@ -346,8 +346,8 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                                 teamMatch.getCreatedAt(),
                                 matchResult.getHomeScore(),
                                 matchResult.getAwayScore(),
-                                matchResult.getWinnerTeam().getId(),
-                                matchResult.getWinnerTeam().getTeamName()
+                                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
+                                matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName()
                                 );
                     })
                     .toList();
