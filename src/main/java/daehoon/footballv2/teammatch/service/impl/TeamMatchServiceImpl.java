@@ -197,6 +197,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TeamMatchDetailResponse findTeamMatchDetail(Long teamMatchId) {
         TeamMatch teamMatch = teamMatchValidator.validateTeamMatchExists(teamMatchId);// 팀 매치 조회
         TeamMatchStatus status = teamMatch.getStatus();
