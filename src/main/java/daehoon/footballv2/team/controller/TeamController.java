@@ -108,8 +108,8 @@ public class TeamController {
 
     // 팀장 위임
     @PatchMapping("/api/teams/{teamId}/leader")
-    public ResponseEntity<TeamLeaderTransferResponse> teamLeaderTransfer(@PathVariable Long teamId, @RequestHeader("X-MEMBER-ID") Long currentLeaderMemberId, @RequestBody TeamLeaderTransferRequest request) {
-        TeamLeaderTransferResponse response = teamService.transferLeader(teamId, currentLeaderMemberId, request.getNewLeaderMemberId());
+    public ResponseEntity<TeamLeaderTransferResponse> teamLeaderTransfer(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId, @RequestBody TeamLeaderTransferRequest request) {
+        TeamLeaderTransferResponse response = teamService.transferLeader(teamId, memberId, request.getNewLeaderMemberId());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
