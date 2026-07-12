@@ -24,6 +24,7 @@ public class TeamMatchValidator {
      * @return 해당팀이 진행하는 매치의 status 가 아직, PENDING 또는, MATCHED 인 경우 DuplicateTeamMatchException 을 던지고, status = COMPLETED 이거나, 매치등록을 안했으면 통과
      */
     public void validateNoActiveMatch(Long teamId) {
+
         if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)) {
             throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
         }
@@ -31,6 +32,15 @@ public class TeamMatchValidator {
         else if (teamMatchRepository.existsByHomeTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
             throw new DuplicateTeamMatchException("이미 진행중인 매치가 존재합니다.");
         }
+
+        else if (teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.PENDING)) {
+            throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
+        }
+
+        else if (teamMatchRepository.existsByAwayTeamIdAndStatus(teamId, TeamMatchStatus.MATCHED)) {
+            throw new DuplicateTeamMatchException("이미 등록된 매치요청이 존재합니다.");
+        }
+
     }
 
 
