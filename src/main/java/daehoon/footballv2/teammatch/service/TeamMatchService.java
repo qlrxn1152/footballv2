@@ -1,6 +1,7 @@
 package daehoon.footballv2.teammatch.service;
 
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchGoalCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.*;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ public interface TeamMatchService {
 
     List<TeamMatchSummaryResponse> findTeamMatches(); // 모든팀들 조회
 
-    TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore);
+    TeamMatchResultResponse registerMatchResult(Long teamMatchId, Long homeLeaderMemberId, Integer homeScore, Integer awayScore, List<TeamMatchGoalCreateRequest> goals);
 
     List<TeamMatchHistoryResponse> findTeamMatchHistory(Long teamId, TeamMatchStatus status);
 

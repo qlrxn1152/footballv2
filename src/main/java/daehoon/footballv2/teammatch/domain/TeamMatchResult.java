@@ -33,6 +33,9 @@ public class TeamMatchResult {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+
+
+
     public TeamMatchResult(TeamMatch teamMatch, Integer homeScore, Integer awayScore) {
         this.teamMatch = teamMatch;
         this.homeScore = homeScore;
