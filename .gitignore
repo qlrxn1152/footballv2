@@ -7,17 +7,38 @@ build/
 *.iml
 out/
 
+# VSCode
+.vscode/
+
 # OS
 .DS_Store
 Thumbs.db
+.AppleDouble
+.LSOverride
 
 # Logs
 *.log
+logs/
 
 # Local environment
 .env
+.env.*
+!.env.example
+
 application-local.properties
 application-dev.properties
+application-secret.properties
+application-private.properties
+application-*.local.properties
+
+# H2 database files
+*.mv.db
+*.trace.db
+
+# Runtime files
+tmp/
+temp/
+uploads/
 
 # QueryDSL generated files
 src/main/generated/
