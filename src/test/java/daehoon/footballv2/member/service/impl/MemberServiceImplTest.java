@@ -68,6 +68,7 @@ class MemberServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getUsername()).isEqualTo("userA");
         assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getTotalGoalCount()).isZero();
         assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
         assertThat(response.getTeamName()).isEqualTo("teamA");
         assertThat(response.getTeamRole()).isEqualTo(TeamRole.LEADER);
@@ -88,6 +89,7 @@ class MemberServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getUsername()).isEqualTo("userA");
         assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getTotalGoalCount()).isZero();
         assertThat(response.getTeamId()).isNull();
         assertThat(response.getTeamName()).isNull();
         assertThat(response.getTeamRole()).isNull();

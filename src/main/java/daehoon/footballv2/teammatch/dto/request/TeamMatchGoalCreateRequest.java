@@ -26,4 +26,5 @@ public class TeamMatchGoalCreateRequest {
         this.scorerMemberId = scorerMemberId;
         this.goalCount = goalCount;
     }
+
 }

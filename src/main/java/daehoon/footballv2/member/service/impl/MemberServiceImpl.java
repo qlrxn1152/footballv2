@@ -81,6 +81,7 @@ public class MemberServiceImpl implements MemberService {
                     member.getId(),
                     member.getUsername(),
                     member.getMemberRating(),
+                    member.getTotalGoalCount(),
                     member.getCreatedAt()
             );
         }
@@ -90,6 +91,7 @@ public class MemberServiceImpl implements MemberService {
                 member.getId(),
                 member.getUsername(),
                 member.getMemberRating(),
+                member.getTotalGoalCount(),
                 teamMember.getTeam().getId(),
                 teamMember.getTeam().getTeamName(),
                 teamMember.getTeamRole(),
