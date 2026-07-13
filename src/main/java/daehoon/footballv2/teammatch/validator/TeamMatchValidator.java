@@ -93,10 +93,17 @@ public class TeamMatchValidator {
         }
     }
 
-    public void validateParticipantTeam(TeamMatch teamMatch, Long requestTeamId) {
+    public void validateIsHomeTeam(TeamMatch teamMatch, Long requestTeamId) {
         if (!teamMatch.getHomeTeam().getId().equals(requestTeamId)) {
-            throw new NotSameTeamException("해당 매치에 참여한 팀이 아닙니다.");
+            throw new NotSameTeamException("홈팀이 아닙니다.");
         }
+    }
+
+    public void validateParticipantTeam(TeamMatch teamMatch, Long requestTeamId) {
+        if ( !teamMatch.getHomeTeam().getId().equals(requestTeamId) && !teamMatch.getAwayTeam().getId().equals(requestTeamId) ) {
+            throw new NotSameTeamException("매치에 참여한 팀이 아닙니다.");
+        }
+
     }
 
     public void validateCompletedStats(TeamMatch teamMatch) {

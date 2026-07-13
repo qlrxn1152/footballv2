@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter @Setter
 @NoArgsConstructor
 public class TeamMatchResultResponse {
@@ -24,7 +27,10 @@ public class TeamMatchResultResponse {
 
     private TeamMatchStatus status;
 
+    private List<TeamMatchGoalResponse> goals = new ArrayList<>();
 
+
+    // 무득점경기
     public TeamMatchResultResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeScore, Long awayTeamId, String awayTeamName, Integer awayScore, TeamMatchStatus status) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
@@ -35,11 +41,25 @@ public class TeamMatchResultResponse {
         this.awayScore = awayScore;
         this.status = status;
 
-        // 무승부
-        if (homeScore.equals(awayScore)) {
-            this.winnerTeamId = null;
-            this.winnerTeamName = null;
-        }
+        this.winnerTeamId = null;
+        this.winnerTeamName = null;
+    }
+
+    // 득점있는 경기
+
+
+    public TeamMatchResultResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeScore,
+                                   Long awayTeamId, String awayTeamName, Integer awayScore,
+                                   TeamMatchStatus status,
+                                   List<TeamMatchGoalResponse> goals) {
+        this.teamMatchId = teamMatchId;
+        this.homeTeamId = homeTeamId;
+        this.homeTeamName = homeTeamName;
+        this.homeScore = homeScore;
+
+        this.awayTeamId = awayTeamId;
+        this.awayTeamName = awayTeamName;
+        this.awayScore = awayScore;
 
         // 홈팀 승
         if (homeScore > awayScore) {
@@ -53,6 +73,7 @@ public class TeamMatchResultResponse {
             this.winnerTeamName = awayTeamName;
         }
 
-
+        this.status = status;
+        this.goals = goals;
     }
 }

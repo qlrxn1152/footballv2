@@ -14,6 +14,7 @@ public class MemberDetailResponse {
     private Long memberId;
     private String username;
     private int memberRating;
+    private Integer totalGoalCount;
     private Long teamId;
     private String teamName;
     private TeamRole teamRole;
@@ -21,10 +22,11 @@ public class MemberDetailResponse {
     private LocalDateTime createdAt;
 
     // 팀이 있는경우
-    public MemberDetailResponse(Long memberId, String username, int memberRating, Long teamId, String teamName, TeamRole teamRole, LocalDateTime joinedAt, LocalDateTime createdAt) {
+    public MemberDetailResponse(Long memberId, String username, int memberRating, Integer totalGoalCount, Long teamId, String teamName, TeamRole teamRole, LocalDateTime joinedAt, LocalDateTime createdAt) {
         this.memberId = memberId;
         this.username = username;
         this.memberRating = memberRating;
+        this.totalGoalCount = totalGoalCount;
         this.teamId = teamId;
         this.teamName = teamName;
         this.teamRole = teamRole;
@@ -33,10 +35,11 @@ public class MemberDetailResponse {
     }
 
     // 팀이 없는경우
-    public MemberDetailResponse(Long memberId, String username, int memberRating, LocalDateTime createdAt) {
+    public MemberDetailResponse(Long memberId, String username, int memberRating, Integer totalGoalCount, LocalDateTime createdAt) {
         this.memberId = memberId;
         this.username = username;
         this.memberRating = memberRating;
+        this.totalGoalCount = totalGoalCount;
         this.createdAt = createdAt;
 
         this.teamId = null;
