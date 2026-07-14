@@ -29,13 +29,13 @@ public class VisitLog {
     private VisitEventType eventType;
 
     @Column(name = "visited_at", nullable = false)
-    private Instant visitedAt;
+    private LocalDateTime visitedAt;
 
     public VisitLog(String visitorUUID, String path, VisitEventType eventType) {
         this.visitorUUID = visitorUUID;
         this.path = path;
         this.eventType = eventType;
-        this.visitedAt = Instant.now();
+        this.visitedAt = LocalDateTime.now();
     }
 
 }
