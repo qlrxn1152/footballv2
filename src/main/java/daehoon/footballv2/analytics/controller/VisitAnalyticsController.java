@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -21,7 +18,7 @@ public class VisitAnalyticsController {
     private final VisitLogService visitLogService;
 
     @GetMapping("/api/admin/analytics/visits/daily")
-    public ResponseEntity<VisitDailySummaryResponse> getVisitDailySummary(@RequestBody LocalDate date) {
+    public ResponseEntity<VisitDailySummaryResponse> getVisitDailySummary(@RequestParam LocalDate date) {
 
         VisitDailySummaryResponse response = visitLogService.getDailySummary(date);
 
