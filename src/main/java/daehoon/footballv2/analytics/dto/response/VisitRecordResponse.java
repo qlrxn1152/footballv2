@@ -14,9 +14,9 @@ import java.time.ZonedDateTime;
 public class VisitRecordResponse {
 
     private Long visitId;
-    private Instant visitedAt;
+    private LocalDateTime visitedAt;
 
-    public VisitRecordResponse(Long visitId, Instant visitedAt) {
+    public VisitRecordResponse(Long visitId, LocalDateTime visitedAt) {
         this.visitId = visitId;
         this.visitedAt = visitedAt;
     }
