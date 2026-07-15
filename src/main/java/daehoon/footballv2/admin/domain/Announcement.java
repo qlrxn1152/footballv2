@@ -55,4 +55,13 @@ public class Announcement {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateAnnouncement(AnnouncementType announcementType, String title, String content, String version, boolean pinned) {
+        this.announcementType = announcementType;
+        this.title = title;
+        this.content = content;
+        this.version = version;
+        this.pinned = pinned;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

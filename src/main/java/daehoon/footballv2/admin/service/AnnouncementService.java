@@ -2,6 +2,7 @@ package daehoon.footballv2.admin.service;
 
 import daehoon.footballv2.admin.domain.Announcement;
 import daehoon.footballv2.admin.dto.request.AnnouncementCreateRequest;
+import daehoon.footballv2.admin.dto.request.AnnouncementUpdateRequest;
 import daehoon.footballv2.admin.dto.response.AnnouncementDetailResponse;
 import daehoon.footballv2.admin.dto.response.AnnouncementSummaryResponse;
 
@@ -16,6 +17,8 @@ public interface AnnouncementService {
 
     AnnouncementDetailResponse findAnnouncementDetail(Long announcementId);
 
+    AnnouncementDetailResponse updateAnnouncement(Long memberId, Long announcementId, AnnouncementUpdateRequest request);
 
+    void deleteAnnouncement(Long memberId, Long announcementId);
 
 }

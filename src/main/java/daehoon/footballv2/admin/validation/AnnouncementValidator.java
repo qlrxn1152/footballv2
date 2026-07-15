@@ -21,7 +21,7 @@ public class AnnouncementValidator {
 
     public Member validateCheckAdmin(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패"));
+                .orElseThrow(() -> new NotFoundMemberException("멤버 조회 실패."));
 
         if (member.getAuthority() != MemberAuthority.ADMIN) {
             throw new NotAdminException("관리자 권한이 없습니다.");

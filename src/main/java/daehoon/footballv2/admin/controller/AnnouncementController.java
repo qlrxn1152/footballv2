@@ -1,6 +1,7 @@
 package daehoon.footballv2.admin.controller;
 
 import daehoon.footballv2.admin.dto.request.AnnouncementCreateRequest;
+import daehoon.footballv2.admin.dto.request.AnnouncementUpdateRequest;
 import daehoon.footballv2.admin.dto.response.AnnouncementDetailResponse;
 import daehoon.footballv2.admin.dto.response.AnnouncementSummaryResponse;
 import daehoon.footballv2.admin.service.AnnouncementService;
@@ -44,5 +45,19 @@ public class AnnouncementController {
         AnnouncementDetailResponse response = announcementService.findAnnouncementDetail(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/api/admin/announcements/{announcementId}")
+    public ResponseEntity<AnnouncementDetailResponse> updateAnnouncement(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long announcementId, AnnouncementUpdateRequest request) {
+        AnnouncementDetailResponse response = announcementService.updateAnnouncement(memberId, announcementId, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/api/admin/announcements/{announcementId}")
+    public ResponseEntity<Void> deleteAnnouncement(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long announcementId) {
+        announcementService.deleteAnnouncement(memberId, announcementId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

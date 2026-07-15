@@ -2,6 +2,7 @@ package daehoon.footballv2.admin.service.impl;
 
 import daehoon.footballv2.admin.domain.Announcement;
 import daehoon.footballv2.admin.dto.request.AnnouncementCreateRequest;
+import daehoon.footballv2.admin.dto.request.AnnouncementUpdateRequest;
 import daehoon.footballv2.admin.dto.response.AnnouncementDetailResponse;
 import daehoon.footballv2.admin.dto.response.AnnouncementSummaryResponse;
 import daehoon.footballv2.admin.exception.exceptions.NotFoundAnnouncementException;
@@ -37,6 +38,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AnnouncementSummaryResponse> findAnnouncements() {
         return announcementRepository.findAll()
                 .stream()
@@ -53,10 +55,29 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AnnouncementDetailResponse findAnnouncementDetail(Long announcementId) {
         Announcement announcement = announceMentValidator.validateAnnouncementExist(announcementId);
 
         return new AnnouncementDetailResponse(announcement.getId(), announcement.getAnnouncementType(), announcement.getTitle(), announcement.getContent(), announcement.getVersion(), announcement.isPinned());
+    }
+
+    @Override
+    public AnnouncementDetailResponse updateAnnouncement(Long memberId, Long announcementId, AnnouncementUpdateRequest request) {
+        Announcement findAnnouncement = announceMentValidator.validateAnnouncementExist(announcementId);
+        announceMentValidator.validateCheckAdmin(memberId);
+
+        findAnnouncement.updateAnnouncement(request.getAnnouncementType(), request.getTitle(), request.getContent(), request.getVersion(), request.isPinned());
+
+        return new AnnouncementDetailResponse(findAnnouncement.getId(), request.getAnnouncementType(), request.getTitle(), request.getContent(), request.getVersion(), request.isPinned());
+    }
+
+    @Override
+    public void deleteAnnouncement(Long memberId, Long announcementId) {
+        Announcement findAnnouncement = announceMentValidator.validateAnnouncementExist(announcementId);
+        announceMentValidator.validateCheckAdmin(memberId);
+
+        announcementRepository.deleteById(findAnnouncement.getId());
     }
 
 
