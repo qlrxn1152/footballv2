@@ -48,7 +48,7 @@ public class AnnouncementController {
     }
 
     @PutMapping("/api/admin/announcements/{announcementId}")
-    public ResponseEntity<AnnouncementDetailResponse> updateAnnouncement(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long announcementId, AnnouncementUpdateRequest request) {
+    public ResponseEntity<AnnouncementDetailResponse> updateAnnouncement(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long announcementId, @Valid @RequestBody AnnouncementUpdateRequest request) {
         AnnouncementDetailResponse response = announcementService.updateAnnouncement(memberId, announcementId, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
