@@ -35,13 +35,19 @@ public class Member {
     @Min(value = 0)
     private Integer totalGoalCount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_authority", nullable = false)
+    private MemberAuthority authority;
+
     public Member(String username, String password) {
         this.username = username;
         this.password = password;
         this.memberRating = DEFAULT_MEMBER_RATING;
         this.totalGoalCount = 0;
         this.createdAt = LocalDateTime.now();
+        this.authority = MemberAuthority.USER;
     }
+
 
     public void addGoals(Integer goalCount) {
         if (goalCount == null || goalCount < 1) {
@@ -50,4 +56,10 @@ public class Member {
 
         this.totalGoalCount += goalCount;
     }
+
+    // 나중에 없애야함, 이 메서드는 테스트를 위한 메서드 // TODO :
+    public void changeAuthority(MemberAuthority newAuthority) {
+        this.authority = newAuthority;
+    }
+
 }
