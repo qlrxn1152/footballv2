@@ -1,5 +1,6 @@
 package daehoon.footballv2.member.dto.response;
 
+import daehoon.footballv2.member.domain.MemberAuthority;
 import daehoon.footballv2.team.domain.TeamRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class MemberMeResponse {
     private Long memberId;
     private String username;
     private int memberRating;
+    private MemberAuthority authority;
     private Long teamId;
     private String teamName;
     private TeamRole teamRole;
@@ -21,10 +23,11 @@ public class MemberMeResponse {
     private LocalDateTime createdAt;
 
     // 팀이 있는경우
-    public MemberMeResponse(Long memberId, String username, int memberRating, Long teamId, String teamName, TeamRole teamRole, LocalDateTime joinedAt, LocalDateTime createdAt) {
+    public MemberMeResponse(Long memberId, String username, int memberRating, MemberAuthority authority, Long teamId, String teamName, TeamRole teamRole, LocalDateTime joinedAt, LocalDateTime createdAt) {
         this.memberId = memberId;
         this.username = username;
         this.memberRating = memberRating;
+        this.authority = authority;
         this.teamId = teamId;
         this.teamName = teamName;
         this.teamRole = teamRole;
@@ -33,10 +36,11 @@ public class MemberMeResponse {
     }
 
     // 팀이 없는경우
-    public MemberMeResponse(Long memberId, String username, int memberRating, LocalDateTime createdAt) {
+    public MemberMeResponse(Long memberId, String username, int memberRating, MemberAuthority authority, LocalDateTime createdAt) {
         this.memberId = memberId;
         this.username = username;
         this.memberRating = memberRating;
+        this.authority = authority;
         this.createdAt = createdAt;
 
         this.teamId = null;

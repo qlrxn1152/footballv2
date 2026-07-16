@@ -115,6 +115,7 @@ public class MemberServiceImpl implements MemberService {
                     member.getId(),
                     member.getUsername(),
                     member.getMemberRating(),
+                    member.getAuthority(),
                     member.getCreatedAt()
             );
         }
@@ -124,6 +125,7 @@ public class MemberServiceImpl implements MemberService {
                 member.getId(),
                 member.getUsername(),
                 member.getMemberRating(),
+                member.getAuthority(),
                 teamMember.getTeam().getId(),
                 teamMember.getTeam().getTeamName(),
                 teamMember.getTeamRole(),
