@@ -25,13 +25,16 @@ public class TeamPost {
     @JoinColumn(name = "author_member_id", nullable = false)
     private Member authorMember;
 
+    @Column(nullable = false, length =  100)
     private String title;
+
+    @Column(nullable = false, length =  5000)
     private String content;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     public TeamPost(Team team, Member authorMember, String title, String content) {

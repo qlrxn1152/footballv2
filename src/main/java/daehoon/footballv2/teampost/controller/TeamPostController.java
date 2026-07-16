@@ -6,6 +6,7 @@ import daehoon.footballv2.teampost.dto.response.TeamPostDetailResponse;
 import daehoon.footballv2.teampost.dto.response.TeamPostSummaryResponse;
 import daehoon.footballv2.teampost.service.TeamPostService;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class TeamPostController {
 
 
     @PostMapping("/api/teams/{teamId}/posts")
-    public ResponseEntity<TeamPostDetailResponse> crateTeamPost(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long teamId, @RequestBody TeamPostCreateRequest request) {
+    public ResponseEntity<TeamPostDetailResponse> createTeamPost(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long teamId, @Valid @RequestBody TeamPostCreateRequest request) {
         TeamPostDetailResponse response = teamPostService.createTeamPost(memberId, teamId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
