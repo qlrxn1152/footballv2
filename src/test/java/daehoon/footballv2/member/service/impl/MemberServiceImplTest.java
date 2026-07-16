@@ -2,6 +2,7 @@ package daehoon.footballv2.member.service.impl;
 
 import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
+import daehoon.footballv2.member.domain.MemberAuthority;
 import daehoon.footballv2.member.dto.response.*;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.service.MemberService;
@@ -122,6 +123,7 @@ class MemberServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getUsername()).isEqualTo("userA");
         assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getAuthority()).isEqualTo(MemberAuthority.USER);
         assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
         assertThat(response.getTeamName()).isEqualTo("teamA");
         assertThat(response.getTeamRole()).isEqualTo(TeamRole.LEADER);
@@ -142,6 +144,7 @@ class MemberServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getUsername()).isEqualTo("userA");
         assertThat(response.getMemberRating()).isEqualTo(1500);
+        assertThat(response.getAuthority()).isEqualTo(MemberAuthority.USER);
         assertThat(response.getTeamId()).isNull();
         assertThat(response.getTeamName()).isNull();
         assertThat(response.getTeamRole()).isNull();
