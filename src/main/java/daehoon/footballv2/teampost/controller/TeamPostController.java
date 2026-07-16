@@ -2,6 +2,7 @@ package daehoon.footballv2.teampost.controller;
 
 import daehoon.footballv2.security.jwt.LoginMember;
 import daehoon.footballv2.teampost.dto.request.TeamPostCreateRequest;
+import daehoon.footballv2.teampost.dto.request.TeamPostUpdateRequest;
 import daehoon.footballv2.teampost.dto.response.TeamPostDetailResponse;
 import daehoon.footballv2.teampost.dto.response.TeamPostSummaryResponse;
 import daehoon.footballv2.teampost.service.TeamPostService;
@@ -44,5 +45,18 @@ public class TeamPostController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PutMapping("/api/teams/{teamId}/posts/{postId}")
+    public ResponseEntity<TeamPostDetailResponse> updateTeamPost(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long teamId, @PathVariable Long postId, @Valid @RequestBody TeamPostUpdateRequest request) {
+        TeamPostDetailResponse response = teamPostService.updateTeamPost(memberId, teamId, postId, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/api/teams/{teamId}/posts/{postId}")
+    public ResponseEntity<Void> deleteTeamPost(@Parameter(hidden = true) @LoginMember Long memberId, @PathVariable Long teamId, @PathVariable Long postId) {
+        teamPostService.deleteTeamPost(memberId, teamId, postId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
 }

@@ -6,6 +6,7 @@ import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teampost.domain.TeamPost;
 import daehoon.footballv2.teampost.dto.request.TeamPostCreateRequest;
+import daehoon.footballv2.teampost.dto.request.TeamPostUpdateRequest;
 import daehoon.footballv2.teampost.dto.response.TeamPostDetailResponse;
 import daehoon.footballv2.teampost.dto.response.TeamPostSummaryResponse;
 import daehoon.footballv2.teampost.repository.TeamPostRepository;
@@ -70,7 +71,7 @@ public class TeamPostServiceImpl implements TeamPostService {
 
         teamValidator.validateSameTeam(teamMember, teamId); // 해당팀에 속해있는지 확인
 
-        TeamPost findPost = teamPostValidator.validateExistTeamPost(postId, teamId);
+        TeamPost findPost = teamPostValidator.validateFindTeamPost(postId, teamId);
 
         return new TeamPostDetailResponse(
                 findPost.getId(),
@@ -82,6 +83,48 @@ public class TeamPostServiceImpl implements TeamPostService {
                 findPost.getCreatedAt(),
                 findPost.getUpdatedAt()
         );
+    }
+
+    @Override
+    public TeamPostDetailResponse updateTeamPost(Long memberId, Long teamId, Long postId, TeamPostUpdateRequest request) {
+        teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(memberId);
+        TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
+        teamValidator.validateSameTeam(teamMember, teamId);
+        TeamPost teamPost = teamPostValidator.validateFindTeamPost(postId, teamId);
+
+        // 작성자가 맞는지
+        teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
+
+        // 같은 제목으로 수정하지는 않는지
+        teamPostValidator.validateTitleForUpdate(request.getTitle(), request.getContent(), teamPost);
+
+        teamPost.updateTeamPost(request.getTitle(), request.getContent());
+
+        return new TeamPostDetailResponse(
+                teamPost.getId(),
+                teamPost.getTeam().getId(),
+                teamPost.getAuthorMember().getId(),
+                teamPost.getTitle(),
+                teamPost.getContent(),
+                teamPost.getAuthorMember().getUsername(),
+                teamPost.getCreatedAt(),
+                teamPost.getUpdatedAt()
+        );
+    }
+
+    @Override
+    public void deleteTeamPost(Long memberId, Long teamId, Long postId) {
+        teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(memberId);
+        TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
+        teamValidator.validateSameTeam(teamMember, teamId);
+        TeamPost teamPost = teamPostValidator.validateFindTeamPost(postId, teamId);
+
+        // 작성자가 맞는지
+        teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
+
+        teamPostRepository.delete(teamPost);
     }
 
 

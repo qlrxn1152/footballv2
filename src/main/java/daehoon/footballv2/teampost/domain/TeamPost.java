@@ -46,5 +46,11 @@ public class TeamPost {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateTeamPost(String title, String content) {
+        this.title = title;
+        this.content = content;
+        this.updatedAt = LocalDateTime.now();
+    }
+
 
 }

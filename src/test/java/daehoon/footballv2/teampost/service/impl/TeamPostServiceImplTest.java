@@ -3,14 +3,17 @@ package daehoon.footballv2.teampost.service.impl;
 import daehoon.footballv2.auth.dto.response.signup.SignupResponse;
 import daehoon.footballv2.auth.service.AuthService;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
+import daehoon.footballv2.team.dto.response.teamjoinrequest.TeamJoinRequestCreateResponse;
 import daehoon.footballv2.team.exception.exceptions.NotJoinedTeamException;
 import daehoon.footballv2.team.exception.exceptions.NotSameTeamException;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teampost.domain.TeamPost;
 import daehoon.footballv2.teampost.dto.request.TeamPostCreateRequest;
+import daehoon.footballv2.teampost.dto.request.TeamPostUpdateRequest;
 import daehoon.footballv2.teampost.dto.response.TeamPostDetailResponse;
 import daehoon.footballv2.teampost.dto.response.TeamPostSummaryResponse;
 import daehoon.footballv2.teampost.exception.exceptions.NotFoundTeamPostException;
+import daehoon.footballv2.teampost.exception.exceptions.NotSameAuthorMemberException;
 import daehoon.footballv2.teampost.repository.TeamPostRepository;
 import daehoon.footballv2.teampost.service.TeamPostService;
 import org.assertj.core.api.Assertions;
@@ -212,6 +215,187 @@ class TeamPostServiceImplTest {
 
         // when && then
         assertThatThrownBy(() -> teamPostService.findTeamPost(member.getMemberId(), team.getTeamId(), 999L))
+                .isInstanceOf(NotFoundTeamPostException.class)
+                .hasMessage("팀 포스트 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "게시물 수정")
+    void updateTeamPost_success() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        TeamPostUpdateRequest updateRequest = new TeamPostUpdateRequest("newTitle", "newContent");
+
+        // when
+        TeamPostDetailResponse response = teamPostService.updateTeamPost(member.getMemberId(), team.getTeamId(), post.getPostId(), updateRequest);
+
+        // then
+        assertThat(response.getPostId()).isEqualTo(post.getPostId());
+        assertThat(response.getTeamId()).isEqualTo(team.getTeamId());
+        assertThat(response.getTitle()).isEqualTo("newTitle");
+        assertThat(response.getContent()).isEqualTo("newContent");
+        assertThat(response.getAuthorUsername()).isEqualTo("test");
+        assertThat(response.getAuthorMemberId()).isEqualTo(member.getMemberId());
+        assertThat(response.getCreatedAt()).isNotNull();
+        assertThat(response.getUpdatedAt()).isNotEqualTo(post.getUpdatedAt());
+    }
+
+    @Test
+    @DisplayName(value = "다른회원 게시물 수정 실패")
+    void updateTeamPost_notAuthor() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamJoinRequestCreateResponse joinRequest = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());
+        teamService.acceptRequest(joinRequest.getTeamJoinRequestId(), team.getTeamId(), member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        TeamPostUpdateRequest updateRequest = new TeamPostUpdateRequest("newTitle", "newContent");
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.updateTeamPost(memberB.getMemberId(), team.getTeamId(), post.getPostId(), updateRequest))
+                .isInstanceOf(NotSameAuthorMemberException.class)
+                .hasMessage("해당 글 작성자가 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른 팀 게시물 수정 실패")
+    void updateTeamPost_notSameTeam() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse taemB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        TeamPostUpdateRequest updateRequest = new TeamPostUpdateRequest("newTitle", "newContent");
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.updateTeamPost(memberB.getMemberId(), team.getTeamId(), post.getPostId(), updateRequest))
+                .isInstanceOf(NotSameTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른 팀 게시물 수정 실패")
+    void updateTeamPost_wrongTeam() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        SignupResponse memberB = authService.signup("memberB", "1234");
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        TeamPostUpdateRequest updateRequest = new TeamPostUpdateRequest("newTitle", "newContent");
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.updateTeamPost(memberB.getMemberId(), teamB.getTeamId(), post.getPostId(), updateRequest))
+                .isInstanceOf(NotFoundTeamPostException.class)
+                .hasMessage("팀 포스트 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 게시물")
+    void updateTeamPost_notFound() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        TeamPostUpdateRequest updateRequest = new TeamPostUpdateRequest("newTitle", "newContent");
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.updateTeamPost(member.getMemberId(), team.getTeamId(), 9999L, updateRequest))
+                .isInstanceOf(NotFoundTeamPostException.class)
+                .hasMessage("팀 포스트 조회 실패");
+    }
+
+    @Test
+    @DisplayName(value = "작성자 삭제 성공")
+    void deleteTeamPost_success() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        // when
+        teamPostService.deleteTeamPost(member.getMemberId(), team.getTeamId(), post.getPostId());
+
+        List<TeamPostSummaryResponse> posts = teamPostService.findTeamPosts(member.getMemberId(), post.getTeamId());
+
+        // then
+        assertThat(posts).isEmpty();
+    }
+
+    @Test
+    @DisplayName(value = "같은팀 다른회원 삭제 실패 ")
+    void deleteTeamPost_notAuthor() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamJoinRequestCreateResponse joinRequest = teamService.joinRequest(team.getTeamId(), memberB.getMemberId());
+        teamService.acceptRequest(joinRequest.getTeamJoinRequestId(), team.getTeamId(), member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.deleteTeamPost(memberB.getMemberId(), team.getTeamId(), post.getPostId()))
+                .isInstanceOf(NotSameAuthorMemberException.class)
+                .hasMessage("해당 글 작성자가 아닙니다.");
+    }
+
+    @Test
+    @DisplayName(value = "다른팀 회원의 게시물 삭제 실패 ")
+    void deleteTeamPost_notTeamMember() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        SignupResponse memberB = authService.signup("memberB", "1234");
+
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+        TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.deleteTeamPost(memberB.getMemberId(), team.getTeamId(), post.getPostId()))
+                .isInstanceOf(NotSameTeamException.class)
+                .hasMessage("다른팀 소속입니다.");
+    }
+
+    @Test
+    @DisplayName(value = "존재하지 않는 게시물 삭제 실패")
+    void deleteTeamPost_notFound() throws Exception {
+        // given
+        SignupResponse member = authService.signup("test", "1234");
+        TeamCreateResponse team = teamService.createTeam("teamA", member.getMemberId());
+
+        TeamPostCreateRequest postRequest = new TeamPostCreateRequest("title1", "content1");
+        TeamPostDetailResponse post = teamPostService.createTeamPost(member.getMemberId(), team.getTeamId(), postRequest); // teamA 에 포스트 작성
+
+        // when && then
+        assertThatThrownBy(() -> teamPostService.deleteTeamPost(member.getMemberId(), team.getTeamId(), 8888L))
                 .isInstanceOf(NotFoundTeamPostException.class)
                 .hasMessage("팀 포스트 조회 실패");
     }
