@@ -71,7 +71,7 @@ public class TeamPostServiceImpl implements TeamPostService {
 
         teamValidator.validateSameTeam(teamMember, teamId); // 해당팀에 속해있는지 확인
 
-        TeamPost findPost = teamPostValidator.validateFindTeamPost(postId, teamId);
+        TeamPost findPost = teamPostValidator.validateExistTeamPost(postId, teamId);
 
         return new TeamPostDetailResponse(
                 findPost.getId(),
@@ -91,7 +91,7 @@ public class TeamPostServiceImpl implements TeamPostService {
         teamValidator.validateMemberExists(memberId);
         TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
         teamValidator.validateSameTeam(teamMember, teamId);
-        TeamPost teamPost = teamPostValidator.validateFindTeamPost(postId, teamId);
+        TeamPost teamPost = teamPostValidator.validateExistTeamPost(postId, teamId);
 
         // 작성자가 맞는지
         teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
@@ -119,7 +119,7 @@ public class TeamPostServiceImpl implements TeamPostService {
         teamValidator.validateMemberExists(memberId);
         TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
         teamValidator.validateSameTeam(teamMember, teamId);
-        TeamPost teamPost = teamPostValidator.validateFindTeamPost(postId, teamId);
+        TeamPost teamPost = teamPostValidator.validateExistTeamPost(postId, teamId);
 
         // 작성자가 맞는지
         teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
