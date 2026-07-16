@@ -12,5 +12,7 @@ public interface TeamPostRepository extends JpaRepository<TeamPost, Long> {
 
     Optional<TeamPost> findByIdAndTeamId(Long teamPostId, Long teamId);
 
+
+
     long countByTeamId(Long teamId);
 }

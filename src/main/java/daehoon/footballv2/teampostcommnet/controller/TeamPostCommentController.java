@@ -2,6 +2,7 @@ package daehoon.footballv2.teampostcommnet.controller;
 
 import daehoon.footballv2.security.jwt.LoginMember;
 import daehoon.footballv2.teampostcommnet.dto.request.TeamPostCommentCreateRequest;
+import daehoon.footballv2.teampostcommnet.dto.request.TeamPostCommentUpdateRequest;
 import daehoon.footballv2.teampostcommnet.dto.response.TeamPostCommentResponse;
 import daehoon.footballv2.teampostcommnet.service.TeamPostCommentService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,9 +34,31 @@ public class TeamPostCommentController {
         List<TeamPostCommentResponse> response = teamPostCommentService.findTeamPostComments(teamId, postId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
-
     }
 
+    @PutMapping("/api/teams/{teamId}/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<TeamPostCommentResponse> updateTeamPostComment(
+            @Parameter(hidden = true) @LoginMember Long memberId,
+            @PathVariable Long teamId,
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody TeamPostCommentUpdateRequest request) {
+        TeamPostCommentResponse response = teamPostCommentService.updateTeamPostComment(memberId, teamId, postId, commentId, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/api/teams/{teamId}/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteTeamPostComment(
+            @Parameter(hidden = true) @LoginMember Long memberId,
+            @PathVariable Long teamId,
+            @PathVariable Long postId,
+            @PathVariable Long commentId
+    ) {
+        teamPostCommentService.deleteTeamPostComment(memberId, teamId, postId, commentId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
 
 }

@@ -94,7 +94,7 @@ public class TeamPostServiceImpl implements TeamPostService {
         TeamPost teamPost = teamPostValidator.validateExistTeamPost(postId, teamId);
 
         // 작성자가 맞는지
-        teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
+        teamPostValidator.validateCheckSamePostAuthor(teamPost, teamMember.getMember().getId());
 
         // 같은 제목으로 수정하지는 않는지
         teamPostValidator.validateTitleForUpdate(request.getTitle(), request.getContent(), teamPost);
@@ -122,7 +122,7 @@ public class TeamPostServiceImpl implements TeamPostService {
         TeamPost teamPost = teamPostValidator.validateExistTeamPost(postId, teamId);
 
         // 작성자가 맞는지
-        teamPostValidator.validateCheckSameAuthor(teamPost, teamMember.getMember().getId());
+        teamPostValidator.validateCheckSamePostAuthor(teamPost, teamMember.getMember().getId());
 
         teamPostRepository.delete(teamPost);
     }

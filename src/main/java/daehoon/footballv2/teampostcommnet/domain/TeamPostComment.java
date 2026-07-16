@@ -43,5 +43,10 @@ public class TeamPostComment {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateComment(String content) {
+        this.content = content;
+        this.updatedAt = LocalDateTime.now();
+    }
+
 
 }
