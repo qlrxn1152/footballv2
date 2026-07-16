@@ -7,6 +7,7 @@ import daehoon.footballv2.teampost.domain.TeamPost;
 import daehoon.footballv2.teampost.validation.TeamPostValidator;
 import daehoon.footballv2.teampostcommnet.domain.TeamPostComment;
 import daehoon.footballv2.teampostcommnet.dto.request.TeamPostCommentCreateRequest;
+import daehoon.footballv2.teampostcommnet.dto.request.TeamPostCommentUpdateRequest;
 import daehoon.footballv2.teampostcommnet.dto.response.TeamPostCommentResponse;
 import daehoon.footballv2.teampostcommnet.repository.TeamPostCommentRepository;
 import daehoon.footballv2.teampostcommnet.service.TeamPostCommentService;
@@ -56,12 +57,11 @@ public class TeamPostCommentServiceImpl implements TeamPostCommentService {
     @Override
     public List<TeamPostCommentResponse> findTeamPostComments(Long teamId, Long postId, Long memberId) {
         teamValidator.validateTeamExists(teamId);
-        Member member = teamValidator.validateMemberExists(memberId);
+        teamValidator.validateMemberExists(memberId);
         TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
         teamValidator.validateSameTeam(teamMember, teamId);
 
         teamPostValidator.validateExistTeamPost(postId, teamId);
-
 
         return teamPostCommentRepository.findAllTeamPostComment(postId, teamId)
                 .stream()
@@ -75,8 +75,46 @@ public class TeamPostCommentServiceImpl implements TeamPostCommentService {
                         comment.getUpdatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public TeamPostCommentResponse updateTeamPostComment(Long memberId, Long teamId, Long postId, Long commentId, TeamPostCommentUpdateRequest request) {
+        teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(memberId);
+        TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
+        teamValidator.validateSameTeam(teamMember, teamId);
+
+        TeamPost teamPost = teamPostValidator.validateExistTeamPost(postId, teamId);
+
+        // 해당 포스터에 댓글이 있는지 확인
+        TeamPostComment comment = teamPostValidator.validateExistTeamPostComment(commentId, teamId, postId);
+        teamPostValidator.validateCheckSameCommentAuthor(comment, memberId);
 
 
+        comment.updateComment(request.getContent());
 
+        return new TeamPostCommentResponse(
+                comment.getId(),
+                teamPost.getId(),
+                teamMember.getMember().getId(),
+                teamMember.getMember().getUsername(),
+                comment.getContent(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt()
+        );
+    }
+
+    @Override
+    public void deleteTeamPostComment(Long memberId, Long teamId, Long postId, Long commentId) {
+        teamValidator.validateTeamExists(teamId);
+        teamValidator.validateMemberExists(memberId);
+        TeamMember teamMember = teamValidator.validateJoinedTeam(memberId);
+        teamValidator.validateSameTeam(teamMember, teamId);
+        teamPostValidator.validateExistTeamPost(postId, teamId);
+
+        TeamPostComment comment = teamPostValidator.validateExistTeamPostComment(commentId, teamId, postId);
+        teamPostValidator.validateCheckSameCommentAuthor(comment, memberId);
+
+        teamPostCommentRepository.delete(comment);
     }
 }
