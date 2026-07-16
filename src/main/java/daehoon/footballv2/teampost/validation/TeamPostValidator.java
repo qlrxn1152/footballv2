@@ -14,7 +14,7 @@ public class TeamPostValidator {
 
     private final TeamPostRepository teamPostRepository;
 
-    public TeamPost validateFindTeamPost(Long postId, Long teamId) {
+    public TeamPost validateExistTeamPost(Long postId, Long teamId) {
         return teamPostRepository.findByIdAndTeamId(postId, teamId)
                 .orElseThrow(() -> new NotFoundTeamPostException("팀 포스트 조회 실패"));
     }
