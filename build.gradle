@@ -34,6 +34,9 @@ dependencies {
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
+	// Error monitoring
+	implementation 'io.sentry:sentry-spring-boot-4-starter:8.49.0'
+
 	// QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
