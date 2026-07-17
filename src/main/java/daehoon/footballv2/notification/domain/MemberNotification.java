@@ -32,8 +32,10 @@ public class MemberNotification {
     private String content;
 
     // 매치 아이디?
+    @Column(name = "reference_id", nullable = false)
     private Long referenceId;
 
+    @Column(name = "notification_read", nullable = false)
     private boolean read;
 
     @Column(nullable = false)
