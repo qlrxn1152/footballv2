@@ -7,12 +7,33 @@ import io.sentry.protocol.Request;
 import io.sentry.protocol.User;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SentryMonitoringConfigurationTest {
+
+    @Test
+    void productionRequestBodySizeUsesAValidSentryValue() throws IOException {
+        Properties properties = new Properties();
+        try (InputStream input = getClass().getClassLoader()
+                .getResourceAsStream("application-prod.properties")) {
+            assertThat(input).isNotNull();
+            properties.load(input);
+        }
+
+        String configuredValue = properties.getProperty(
+                "sentry.max-request-body-size");
+
+        assertThat(SentryOptions.RequestSize.valueOf(
+                configuredValue.toUpperCase(Locale.ROOT)))
+                .isEqualTo(SentryOptions.RequestSize.NONE);
+    }
 
     @Test
     void removesSensitiveRequestDataBeforeSending() {
