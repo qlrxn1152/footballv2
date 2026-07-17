@@ -1,6 +1,9 @@
 package daehoon.footballv2.teammatch.service.impl;
 
 import daehoon.footballv2.member.domain.Member;
+import daehoon.footballv2.notification.domain.MemberNotification;
+import daehoon.footballv2.notification.repository.MemberNotificationRepository;
+import daehoon.footballv2.notification.service.MemberNotificationService;
 import daehoon.footballv2.team.domain.TeamMember;
 import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
@@ -37,6 +40,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
     private final TeamMatchRepository teamMatchRepository;
     private final TeamMatchResultRepository teamMatchResultRepository;
     private final TeamMatchGoalRepository teamMatchGoalRepository;
+    private final MemberNotificationService notificationService;
 
     private final TeamValidator teamValidator;
     private final TeamMatchValidator teamMatchValidator;
@@ -82,7 +86,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         teamMatchValidator.validateNoActiveMatchForAccept(awayTeamLeaderMember.getTeam().getId()); // 어웨이팀이 이미 진행중인 매치가 있는게 아니야? -> PENDING, MATCHED 인게 이미 있는거아니야?
 
 
+        notificationService.createMatchAcceptedNotification(teamMatch); // 매칭성사 알림 보냄
         teamMatch.matchedTheMatch(awayTeamLeaderMember.getTeam()); // 매칭성사 -> awayTeam 설정, MATCHED 로 변경
+
 
         return new TeamMatchAcceptResponse(
                 teamMatch.getId(),
