@@ -9,4 +9,5 @@ import java.util.List;
 public interface MemberNotificationRepository extends JpaRepository<MemberNotification, Long> {
 
     List<MemberNotification> findByReceiverMemberId(Long memberId);
+
 }
