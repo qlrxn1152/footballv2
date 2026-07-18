@@ -90,7 +90,6 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
         teamMatchValidator.validateNoActiveMatchForAccept(awayTeamLeaderMember.getTeam().getId()); // 어웨이팀이 이미 진행중인 매치가 있는게 아니야? -> PENDING, MATCHED 인게 이미 있는거아니야?
 
-
         notificationService.createMatchAcceptedNotification(teamMatch); // 매칭성사 알림 보냄
         teamMatch.matchedTheMatch(awayTeamLeaderMember.getTeam()); // 매칭성사 -> awayTeam 설정, MATCHED 로 변경
 

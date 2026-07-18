@@ -55,5 +55,10 @@ public class MemberDeviceTokenServiceImpl implements MemberDeviceTokenService {
                 .toList();
     }
 
+    @Override
+    public void deleteInvalidToken(String token) {
+        memberDeviceTokenRepository.deleteByToken(token);
+    }
+
 
 }

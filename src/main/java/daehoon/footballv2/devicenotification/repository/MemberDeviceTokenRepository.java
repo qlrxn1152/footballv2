@@ -17,4 +17,6 @@ public interface MemberDeviceTokenRepository extends JpaRepository<MemberDeviceT
     boolean existsByMemberIdAndToken(Long memberId, String token);
 
     List<MemberDeviceToken> findAllByMemberId(Long memberId);
+
+    void deleteByToken(String token);
 }

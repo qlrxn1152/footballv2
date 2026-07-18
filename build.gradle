@@ -37,6 +37,9 @@ dependencies {
 	// Error monitoring
 	implementation 'io.sentry:sentry-spring-boot-4-starter:8.49.0'
 
+	// Firebase
+	implementation 'com.google.firebase:firebase-admin:9.10.0'
+
 	// QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
