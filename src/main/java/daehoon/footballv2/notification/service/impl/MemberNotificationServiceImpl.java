@@ -1,5 +1,6 @@
 package daehoon.footballv2.notification.service.impl;
 
+import daehoon.footballv2.devicenotification.event.MatchAcceptedPushEvent;
 import daehoon.footballv2.member.domain.Member;
 import daehoon.footballv2.member.exception.exceptions.NotFoundMemberException;
 import daehoon.footballv2.member.repository.MemberRepository;
@@ -17,6 +18,7 @@ import daehoon.footballv2.team.validator.TeamValidator;
 import daehoon.footballv2.teammatch.domain.TeamMatch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class MemberNotificationServiceImpl implements MemberNotificationService 
 
     private final TeamMemberRepository teamMemberRepository;
     private final MemberNotificationRepository notificationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Override
@@ -77,8 +80,20 @@ public class MemberNotificationServiceImpl implements MemberNotificationService 
 
         Member leaderMember = teamMember.getMember();
 
+        String title = "매치가 성사됐습니다.";
+        String content = "매치 성사 완료.";
 
-        notificationRepository.save(new MemberNotification(leaderMember, NotificationType.MATCH_ACCEPTED, "매치가 성사됐습니다.", "매치 성사 완료", teamMatch.getId()));
+        notificationRepository.save(new MemberNotification(leaderMember, NotificationType.MATCH_ACCEPTED, title, content, teamMatch.getId()));
+
+        eventPublisher.publishEvent(new MatchAcceptedPushEvent(
+                leaderMember.getId(),
+                teamMatch.getId(),
+                NotificationType.MATCH_ACCEPTED,
+                title,
+                content
+        ));
+
+
     }
 
     @Override

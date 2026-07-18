@@ -11,4 +11,6 @@ public interface MemberDeviceTokenService {
     void unregisterDeviceToken(Long memberId, String token);
 
     List<String> findTokensByMemberId(Long memberId);
+
+    void deleteInvalidToken(String token);
 }
