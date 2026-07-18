@@ -34,9 +34,19 @@ public class TeamMatch {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt; // 매치요청 생성날짜가 언제인지
 
-    public TeamMatch(Team homeTeam, LocalDateTime playedAt) {
+    @Column(name = "stadium_name", length = 100, nullable = false)
+    private String stadiumName;
+
+    @Column(name = "stadium_address", length = 255, nullable = false)
+    private String stadiumAddress;
+
+    // 매치생성
+    public TeamMatch(Team homeTeam, LocalDateTime playedAt, String stadiumName, String stadiumAddress) {
         this.homeTeam = homeTeam;
         this.playedAt = playedAt; // 매치 진행날짜
+
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
 
         this.awayTeam = null;
         this.status = TeamMatchStatus.PENDING;

@@ -1,6 +1,7 @@
 package daehoon.footballv2.teammatch.service;
 
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchCreateRequest;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchGoalCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.*;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface TeamMatchService {
 
-    TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId, LocalDateTime playedAt);
+    TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId, TeamMatchCreateRequest request);
 
     TeamMatchAcceptResponse acceptTeamMatch(Long teamMatchId, Long awayLeaderMemberId);
 

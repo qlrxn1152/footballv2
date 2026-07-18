@@ -28,7 +28,7 @@ public class TeamMatchController {
     // 매치생성
     @PostMapping("/api/teams/{teamId}/matches")
     public ResponseEntity<TeamMatchCreateResponse> matchCreate(@PathVariable Long teamId, @Parameter(hidden = true) @LoginMember Long memberId, @Valid @RequestBody TeamMatchCreateRequest request) {
-        TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId, request.getPlayedAt());
+        TeamMatchCreateResponse response = teamMatchService.createTeamMatch(teamId, memberId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
