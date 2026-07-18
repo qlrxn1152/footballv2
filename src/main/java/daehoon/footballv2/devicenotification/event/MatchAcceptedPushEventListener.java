@@ -21,6 +21,13 @@ public class MatchAcceptedPushEventListener {
     public void handleMatchAcceptedPush(
             MatchAcceptedPushEvent event
     ) {
+        log.info(
+                "FCM 이벤트 처리 시작: memberId={}, type={}, referenceId={}",
+                event.receiverMemberId(),
+                event.type(),
+                event.teamMatchId()
+        );
+
         FcmPushRequest request = new FcmPushRequest(
                 event.title(),
                 event.body(),

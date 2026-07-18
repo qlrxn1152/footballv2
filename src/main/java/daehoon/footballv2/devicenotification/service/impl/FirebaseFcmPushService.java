@@ -32,6 +32,16 @@ public class FirebaseFcmPushService implements FcmPushService {
         List<String> tokens =
                 memberDeviceTokenService.findTokensByMemberId(memberId);
 
+        if (tokens.isEmpty()) {
+            log.warn(
+                    "FCM 전송 대상 토큰 없음: memberId={}, type={}, referenceId={}",
+                    memberId,
+                    request.type(),
+                    request.referenceId()
+            );
+            return;
+        }
+
         for (String token : tokens) {
             Message message = Message.builder()
                     .setToken(token)
@@ -59,10 +69,13 @@ public class FirebaseFcmPushService implements FcmPushService {
                 );
             } catch (FirebaseMessagingException exception) {
                 log.error(
-                        "FCM 전송 실패: memberId={}, type={}, errorCode={}",
+                        "FCM 전송 실패: memberId={}, type={}, referenceId={}, errorCode={}, message={}",
                         memberId,
                         request.type(),
-                        exception.getMessagingErrorCode()
+                        request.referenceId(),
+                        exception.getMessagingErrorCode(),
+                        exception.getMessage(),
+                        exception
                 );
 
                 if (exception.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {

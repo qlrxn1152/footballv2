@@ -12,7 +12,12 @@ import org.springframework.stereotype.Service;
 public class NoopFcmPushService implements FcmPushService {
     @Override
     public void sendToMember(Long memberId, FcmPushRequest request) {
-        log.debug("FCM 전송 비활성화 : memberId = {}, type = {}, referenceId = {}", memberId, request.type(), request.referenceId());
+        log.warn(
+                "FCM 전송 비활성화: memberId={}, type={}, referenceId={}",
+                memberId,
+                request.type(),
+                request.referenceId()
+        );
 
     }
 }
