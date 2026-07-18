@@ -42,7 +42,8 @@ public class MemberDeviceToken {
     }
 
     public void refreshRegistration(Member member, DevicePlatform platform) {
-        // 해당 멤버의 해당 플랫폼의 토큰을 리프레쉬 ..?
+        this.member = member;
+        this.platform = platform;
         this.updatedAt = LocalDateTime.now();
     }
 }
