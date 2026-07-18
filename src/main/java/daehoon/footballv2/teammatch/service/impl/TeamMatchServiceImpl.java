@@ -387,7 +387,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                             matchResult.getAwayScore(),
                             matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
                             matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
-                            teamMatch.getPlayedAt()
+                            teamMatch.getPlayedAt(),
+                            teamMatch.getStadiumName(),
+                            teamMatch.getStadiumAddress()
                             );
                 })
                 .toList();
@@ -410,7 +412,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                                 matchResult.getAwayScore(),
                                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
                                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
-                                teamMatch.getPlayedAt()
+                                teamMatch.getPlayedAt(),
+                                teamMatch.getStadiumName(),
+                                teamMatch.getStadiumAddress()
                         );
                 })
                 .toList();
@@ -441,7 +445,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getTeamName(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
 
@@ -454,7 +460,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getTeamName(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
 
@@ -483,7 +491,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getTeamName(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
 
@@ -495,7 +505,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getTeamName(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
 
@@ -531,7 +543,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
                             teamMatch.getStatus(),
                             teamMatch.getCreatedAt(),
-                            teamMatch.getPlayedAt()
+                            teamMatch.getPlayedAt(),
+                            teamMatch.getStadiumName(),
+                            teamMatch.getStadiumAddress()
                     );
                 })
                 .toList();
@@ -550,7 +564,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getAwayTeam().getTeamRating(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
     }
@@ -565,7 +581,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                         teamMatch.getHomeTeam().getTeamRating(),
                         teamMatch.getStatus(),
                         teamMatch.getCreatedAt(),
-                        teamMatch.getPlayedAt()
+                        teamMatch.getPlayedAt(),
+                        teamMatch.getStadiumName(),
+                        teamMatch.getStadiumAddress()
                 ))
                 .toList();
     }
@@ -580,7 +598,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getHomeTeam().getTeamRating(),
                     teamMatch.getStatus(),
                     teamMatch.getCreatedAt(),
-                    teamMatch.getPlayedAt()
+                    teamMatch.getPlayedAt(),
+                    teamMatch.getStadiumName(),
+                    teamMatch.getStadiumAddress()
             );
         }
 
@@ -595,7 +615,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getAwayTeam().getTeamRating(),
                     teamMatch.getStatus(),
                     teamMatch.getCreatedAt(),
-                    teamMatch.getPlayedAt()
+                    teamMatch.getPlayedAt(),
+                    teamMatch.getStadiumName(),
+                    teamMatch.getStadiumAddress()
             );
         }
 
@@ -616,7 +638,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
                 teamMatch.getStatus(),
                 teamMatch.getCreatedAt(),
-                teamMatch.getPlayedAt()
+                teamMatch.getPlayedAt(),
+                teamMatch.getStadiumName(),
+                teamMatch.getStadiumAddress()
         );
     }
 

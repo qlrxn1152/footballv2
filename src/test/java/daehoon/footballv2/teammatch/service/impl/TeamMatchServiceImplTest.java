@@ -91,6 +91,14 @@ class TeamMatchServiceImplTest {
         assertThat(response.getHomeTeamId()).isEqualTo(team.getTeamId());
         assertThat(response.getHomeTeamName()).isEqualTo("teamA");
         assertThat(response.getStatus()).isEqualTo(TeamMatchStatus.PENDING);
+        assertThat(response.getStadiumName()).isEqualTo("stadium");
+        assertThat(response.getStadiumAddress()).isEqualTo("address");
+
+        TeamMatch savedMatch =
+                teamMatchRepository.findById(response.getTeamMatchId()).orElseThrow();
+
+        assertThat(savedMatch.getStadiumName()).isEqualTo("stadium");
+        assertThat(savedMatch.getStadiumAddress()).isEqualTo("address");
     }
 
     @Test
@@ -209,6 +217,10 @@ class TeamMatchServiceImplTest {
         assertThat(response.get(0).getHomeTeamName()).isEqualTo("teamA");
         assertThat(response.get(0).getStatus()).isEqualTo(TeamMatchStatus.PENDING);
         assertThat(response.get(0).getCreatedAt()).isNotNull();
+
+        assertThat(response.get(0).getStadiumName()).isEqualTo("stadium");
+        assertThat(response.get(0).getStadiumAddress()).isEqualTo("address");
+
     }
 
     @Test
@@ -286,6 +298,15 @@ class TeamMatchServiceImplTest {
         assertThat(response.getHomeTeamId()).isEqualTo(team.getTeamId());
         assertThat(response.getAwayTeamId()).isEqualTo(teamB.getTeamId());
         assertThat(response.getStatus()).isEqualTo(TeamMatchStatus.MATCHED);
+
+        assertThat(teamMatch.getStadiumName()).isEqualTo("stadium");
+        assertThat(teamMatch.getStadiumAddress()).isEqualTo("address");
+
+        TeamMatch savedMatch =
+                teamMatchRepository.findById(response.getTeamMatchId()).orElseThrow();
+
+        assertThat(savedMatch.getStadiumName()).isEqualTo("stadium");
+        assertThat(savedMatch.getStadiumAddress()).isEqualTo("address");
     }
 
     @Test

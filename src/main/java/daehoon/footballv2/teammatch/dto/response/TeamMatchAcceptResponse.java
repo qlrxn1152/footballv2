@@ -18,6 +18,7 @@ public class TeamMatchAcceptResponse {
     private String awayTeamName;
     private Integer awayTeamRating;
 
+
     private TeamMatchStatus status;
 
     public TeamMatchAcceptResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating, Long awayTeamId, String awayTeamName, Integer awayTeamRating, TeamMatchStatus status) {

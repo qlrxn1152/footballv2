@@ -29,8 +29,11 @@ public class TeamMatchHistoryResponse {
     private Long winnerTeamId;
     private String winnerTeamName;
 
+    private String stadiumName;
+    private String stadiumAddress;
+
     // PENDING -> home팀에대한 정보만 있음
-    public TeamMatchHistoryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt) {
+    public TeamMatchHistoryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt, String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
@@ -44,10 +47,13 @@ public class TeamMatchHistoryResponse {
         this.awayScore = null;
         this.winnerTeamId = null;
         this.winnerTeamName = null;
+
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
     }
 
     // MATCHED -> away팀에대한 정보도 있지만, 결과는 없음.
-    public TeamMatchHistoryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Long awayTeamId, String awayTeamName, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt) {
+    public TeamMatchHistoryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Long awayTeamId, String awayTeamName, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt, String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
@@ -57,6 +63,8 @@ public class TeamMatchHistoryResponse {
         this.createdAt = createdAt;
         this.playedAt = playedAt;
 
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
 
         this.homeScore = null;
         this.awayScore = null;
@@ -67,7 +75,7 @@ public class TeamMatchHistoryResponse {
     // COMPLETED -> 매치결과와, 승리팀에 대한 정보도 있음.
 
     public TeamMatchHistoryResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Long awayTeamId, String awayTeamName,
-                                    TeamMatchStatus status, LocalDateTime createdAt, Integer homeScore, Integer awayScore, Long winnerTeamId, String winnerTeamName, LocalDateTime playedAt) {
+                                    TeamMatchStatus status, LocalDateTime createdAt, Integer homeScore, Integer awayScore, Long winnerTeamId, String winnerTeamName, LocalDateTime playedAt, String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
@@ -78,6 +86,9 @@ public class TeamMatchHistoryResponse {
         this.status = status;
         this.createdAt = createdAt;
         this.playedAt = playedAt;
+
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
 
 
         this.homeScore = homeScore;

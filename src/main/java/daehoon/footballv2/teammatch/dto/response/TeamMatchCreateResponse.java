@@ -34,6 +34,6 @@ public class TeamMatchCreateResponse {
         this.stadiumName = stadiumName;
         this.stadiumAddress = stadiumAddress;
         this.playedAt = playedAt;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
 }
