@@ -10,6 +10,7 @@ import daehoon.footballv2.teammatch.domain.TeamMatch;
 import daehoon.footballv2.teammatch.domain.TeamMatchGoal;
 import daehoon.footballv2.teammatch.domain.TeamMatchResult;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchCreateRequest;
 import daehoon.footballv2.teammatch.dto.request.TeamMatchGoalCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.*;
 import daehoon.footballv2.teammatch.exception.exceptions.NotFoundTeamMatchResultException;
@@ -47,7 +48,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
 
 
     @Override
-    public TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId, LocalDateTime playedAt) {
+    public TeamMatchCreateResponse createTeamMatch(Long teamId, Long memberId, TeamMatchCreateRequest request) {
         // 매치 생성버튼을 누름 -> 필요한 검증들 진행 ...
         teamValidator.validateTeamExists(teamId); // 팀이있는지
         teamValidator.validateMemberExists(memberId); // 멤버가있는지
@@ -61,7 +62,7 @@ public class TeamMatchServiceImpl implements TeamMatchService {
         teamMatchValidator.validateNoActiveMatch(teamId);
 
         // 매치를 생성 -> 매치를 저장 ( awayTeam = null ) 홈팀에대한 정보만 존재.
-        TeamMatch teamMatch = teamMatchRepository.save(new TeamMatch(teamMember.getTeam(), playedAt));
+        TeamMatch teamMatch = teamMatchRepository.save(new TeamMatch(teamMember.getTeam(), request.getPlayedAt(), request.getStadiumName(), request.getStadiumAddress()));
 
         // dto 로 변경해서, 응답 dto 를 반환
         return new TeamMatchCreateResponse(
@@ -70,8 +71,12 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                 teamMatch.getHomeTeam().getTeamName(),
                 teamMatch.getHomeTeam().getTeamRating(),
                 teamMatch.getStatus(),
-                playedAt
+                teamMatch.getStadiumName(),
+                teamMatch.getStadiumAddress(),
+                teamMatch.getPlayedAt(),
+                teamMatch.getCreatedAt()
         );
+
     }
 
     @Override
@@ -280,7 +285,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getHomeTeam().getTeamRating(),
                     teamMatch.getStatus(),
                     teamMatch.getCreatedAt(),
-                    teamMatch.getPlayedAt()
+                    teamMatch.getPlayedAt(),
+                    teamMatch.getStadiumName(),
+                    teamMatch.getStadiumAddress()
             );
         }
 
@@ -298,7 +305,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     teamMatch.getAwayTeam().getTeamRating(),
                     teamMatch.getStatus(),
                     teamMatch.getCreatedAt(),
-                    teamMatch.getPlayedAt()
+                    teamMatch.getPlayedAt(),
+                    teamMatch.getStadiumName(),
+                    teamMatch.getStadiumAddress()
             );
         }
 
@@ -323,7 +332,9 @@ public class TeamMatchServiceImpl implements TeamMatchService {
                     matchResult.getHomeScore(),
                     matchResult.getAwayScore(),
                     matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getId(),
-                    matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName()
+                    matchResult.getWinnerTeam() == null ? null : matchResult.getWinnerTeam().getTeamName(),
+                    teamMatch.getStadiumName(),
+                    teamMatch.getStadiumAddress()
             );
         }
 

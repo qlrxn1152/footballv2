@@ -21,10 +21,15 @@ public class TeamMatchDetailResponse {
     private String awayTeamName;
     private Integer awayTeamRating;
 
+    private String stadiumName;
+    private String stadiumAddress;
+
     private TeamMatchStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime playedAt;
+
+
 
     // == COMPLETED 인 경우에만 가집니다. 나머지는 Null
     private Integer homeScore;
@@ -35,9 +40,7 @@ public class TeamMatchDetailResponse {
 
 
     // PENDING 인 경우
-
-
-    public TeamMatchDetailResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt) {
+    public TeamMatchDetailResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating, TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt, String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
@@ -45,6 +48,9 @@ public class TeamMatchDetailResponse {
         this.status = status;
         this.createdAt = createdAt;
         this.playedAt = playedAt;
+
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
 
         this.awayTeamId = null;
         this.awayTeamName = null;
@@ -59,14 +65,19 @@ public class TeamMatchDetailResponse {
     //MATCHED 인 경우
     public TeamMatchDetailResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating,
                                    Long awayTeamId, String awayTeamName, Integer awayTeamRating,
-                                   TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt) {
+                                   TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt,
+                                   String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
         this.homeTeamRating = homeTeamRating;
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
+
         this.awayTeamId = awayTeamId;
         this.awayTeamName = awayTeamName;
         this.awayTeamRating = awayTeamRating;
+
         this.status = status;
         this.createdAt = createdAt;
         this.playedAt = playedAt;
@@ -82,14 +93,20 @@ public class TeamMatchDetailResponse {
     public TeamMatchDetailResponse(Long teamMatchId, Long homeTeamId, String homeTeamName, Integer homeTeamRating,
                                    Long awayTeamId, String awayTeamName, Integer awayTeamRating,
                                    TeamMatchStatus status, LocalDateTime createdAt, LocalDateTime playedAt,
-                                   Integer homeScore, Integer awayScore, Long winnerTeamId, String winnerTeamName) {
+                                   Integer homeScore, Integer awayScore, Long winnerTeamId, String winnerTeamName,
+                                   String stadiumName, String stadiumAddress) {
         this.teamMatchId = teamMatchId;
         this.homeTeamId = homeTeamId;
         this.homeTeamName = homeTeamName;
         this.homeTeamRating = homeTeamRating;
+
+        this.stadiumName = stadiumName;
+        this.stadiumAddress = stadiumAddress;
+
         this.awayTeamId = awayTeamId;
         this.awayTeamName = awayTeamName;
         this.awayTeamRating = awayTeamRating;
+
         this.status = status;
         this.createdAt = createdAt;
         this.playedAt = playedAt;

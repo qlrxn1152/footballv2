@@ -8,6 +8,7 @@ import daehoon.footballv2.notification.service.MemberNotificationService;
 import daehoon.footballv2.team.dto.response.teamcreate.TeamCreateResponse;
 import daehoon.footballv2.team.service.TeamService;
 import daehoon.footballv2.teammatch.domain.TeamMatchStatus;
+import daehoon.footballv2.teammatch.dto.request.TeamMatchCreateRequest;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchAcceptResponse;
 import daehoon.footballv2.teammatch.dto.response.TeamMatchCreateResponse;
 import daehoon.footballv2.teammatch.service.TeamMatchService;
@@ -36,6 +37,7 @@ class MemberNotificationServiceImplTest {
     @Autowired private TeamMatchService teamMatchService;
 
     static LocalDateTime matchDate = LocalDateTime.of(2026, 7, 17, 13, 00, 00);
+    static TeamMatchCreateRequest matchCreateRequest = new TeamMatchCreateRequest(matchDate, "stadium", "address");
 
     @Test
     @DisplayName(value = "매치 수락 시 알림 생성")
@@ -46,7 +48,8 @@ class MemberNotificationServiceImplTest {
         TeamCreateResponse teamA = teamService.createTeam("teamA", memberA.getMemberId());
         TeamCreateResponse teamB = teamService.createTeam("teamB", memberB.getMemberId());
 
-        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId(), matchDate);
+
+        TeamMatchCreateResponse teamMatch = teamMatchService.createTeamMatch(teamA.getTeamId(), memberA.getMemberId(), matchCreateRequest);
 
         // when
         TeamMatchAcceptResponse teamMatchResponse = teamMatchService.acceptTeamMatch(teamMatch.getTeamMatchId(), memberB.getMemberId());
